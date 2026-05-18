@@ -1,5 +1,6 @@
 # Ignorar arquivos compactados do plugin
 *.zip
+material-apoio/
 
 # Arquivos do sistema operacional
 Thumbs.db
