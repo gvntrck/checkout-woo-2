@@ -181,7 +181,7 @@ $root_classes .= $is_general_checkout ? ' cgv-card-general' : ' cgv-card-single'
             <?php endif; ?>
 
             <!-- Standard WooCommerce payment block (visually re-styled, controls the real payment_method radios). -->
-            <div id="payment" class="woocommerce-checkout-payment cgv-payment">
+            <div id="payment" class="cgv-payment">
                 <?php
                 $methods_to_render = ! empty( $tabs )
                     ? array_intersect_key( $available_gateways, array_flip( wp_list_pluck( $tabs, 'gateway' ) ) )
