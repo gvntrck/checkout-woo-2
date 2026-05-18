@@ -13,7 +13,10 @@ class CGV_Shortcode {
 
     public static function init() {
         add_shortcode( 'checkout-gvntrck', [ __CLASS__, 'render' ] );
+        add_shortcode( 'checkout-gvntrck-geral', [ __CLASS__, 'render_general' ] );
         add_action( 'wp_enqueue_scripts', [ __CLASS__, 'register_assets' ] );
+        add_action( 'wp_ajax_cgv_update_cart', [ __CLASS__, 'ajax_update_cart' ] );
+        add_action( 'wp_ajax_nopriv_cgv_update_cart', [ __CLASS__, 'ajax_update_cart' ] );
     }
 
     /**
@@ -45,6 +48,28 @@ class CGV_Shortcode {
      * Render the shortcode.
      */
     public static function render( $atts = [] ) {
+        $atts = shortcode_atts(
+            [
+                'product_id' => 0,
+            ],
+            $atts,
+            'checkout-gvntrck'
+        );
+
+        return self::render_checkout( 'single', absint( $atts['product_id'] ) );
+    }
+
+    /**
+     * Render the general checkout shortcode.
+     */
+    public static function render_general( $atts = [] ) {
+        return self::render_checkout( 'general' );
+    }
+
+    /**
+     * Render checkout by mode.
+     */
+    protected static function render_checkout( $mode = 'single', $shortcode_product_id = 0 ) {
         if ( ! class_exists( 'WooCommerce' ) ) {
             return '';
         }
@@ -52,18 +77,7 @@ class CGV_Shortcode {
             return '';
         }
 
-        // Initialize WC session/cart on frontend if needed.
-        if ( null === WC()->session ) {
-            $session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );
-            WC()->session = new $session_class();
-            WC()->session->init();
-        }
-        if ( null === WC()->customer ) {
-            WC()->customer = new WC_Customer( get_current_user_id(), true );
-        }
-        if ( null === WC()->cart ) {
-            WC()->cart = new WC_Cart();
-        }
+        self::ensure_wc_cart();
 
         wp_enqueue_style( 'cgv-checkout' );
         wp_enqueue_script( 'cgv-checkout' );
@@ -75,14 +89,17 @@ class CGV_Shortcode {
         $fields   = CGV_Fields::get_fields();
 
         // Ensure the configured product is in the cart for this checkout.
-        $product_id = absint( $settings['product_id'] );
-        if ( $product_id ) {
+        $product_id = $shortcode_product_id ? $shortcode_product_id : absint( $settings['product_id'] );
+        if ( 'single' === $mode && $product_id ) {
             self::ensure_cart( $product_id );
         }
 
         // Localize plugin-specific data.
         wp_localize_script( 'cgv-checkout', 'CGV', [
             'thank_you_url' => esc_url_raw( $settings['thank_you_url'] ),
+            'ajax_url'      => admin_url( 'admin-ajax.php' ),
+            'cart_nonce'    => wp_create_nonce( 'cgv_update_cart' ),
+            'mode'          => $mode,
             'gateway_map'   => [
                 'card'   => $settings['gateway_card'],
                 'pix'    => $settings['gateway_pix'],
@@ -94,8 +111,70 @@ class CGV_Shortcode {
         ] );
 
         ob_start();
+        $checkout_mode = $mode;
         include CGV_DIR . 'templates/checkout-card.php';
         return ob_get_clean();
+    }
+
+    /**
+     * Initialize WC session/cart on frontend if needed.
+     */
+    protected static function ensure_wc_cart() {
+        if ( null === WC()->session ) {
+            $session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );
+            WC()->session = new $session_class();
+            WC()->session->init();
+        }
+        if ( null === WC()->customer ) {
+            WC()->customer = new WC_Customer( get_current_user_id(), true );
+        }
+        if ( null === WC()->cart ) {
+            WC()->cart = new WC_Cart();
+        }
+    }
+
+    /**
+     * AJAX cart actions used by the general checkout.
+     */
+    public static function ajax_update_cart() {
+        if ( ! class_exists( 'WooCommerce' ) ) {
+            wp_send_json_error( [ 'message' => __( 'WooCommerce indisponível.', 'checkout-gvntrck' ) ], 400 );
+        }
+
+        check_ajax_referer( 'cgv_update_cart', 'nonce' );
+        self::ensure_wc_cart();
+
+        $action = isset( $_POST['cart_action'] ) ? sanitize_key( wp_unslash( $_POST['cart_action'] ) ) : '';
+        $key    = isset( $_POST['cart_item_key'] ) ? wc_clean( wp_unslash( $_POST['cart_item_key'] ) ) : '';
+
+        if ( 'set_quantity' === $action ) {
+            $quantity = isset( $_POST['quantity'] ) ? max( 0, absint( wp_unslash( $_POST['quantity'] ) ) ) : 0;
+            if ( $key && isset( WC()->cart->cart_contents[ $key ] ) ) {
+                WC()->cart->set_quantity( $key, $quantity, true );
+            }
+        } elseif ( 'remove_item' === $action ) {
+            if ( $key && isset( WC()->cart->cart_contents[ $key ] ) ) {
+                WC()->cart->remove_cart_item( $key );
+            }
+        } elseif ( 'apply_coupon' === $action ) {
+            $coupon = isset( $_POST['coupon_code'] ) ? wc_format_coupon_code( wp_unslash( $_POST['coupon_code'] ) ) : '';
+            if ( ! $coupon || ! WC()->cart->apply_coupon( $coupon ) ) {
+                wp_send_json_error( [ 'message' => __( 'Não foi possível aplicar este cupom.', 'checkout-gvntrck' ) ], 400 );
+            }
+        } elseif ( 'remove_coupon' === $action ) {
+            $coupon = isset( $_POST['coupon_code'] ) ? wc_format_coupon_code( wp_unslash( $_POST['coupon_code'] ) ) : '';
+            if ( ! $coupon || ! WC()->cart->remove_coupon( $coupon ) ) {
+                wp_send_json_error( [ 'message' => __( 'Não foi possível remover este cupom.', 'checkout-gvntrck' ) ], 400 );
+            }
+        } else {
+            wp_send_json_error( [ 'message' => __( 'Ação inválida.', 'checkout-gvntrck' ) ], 400 );
+        }
+
+        WC()->cart->calculate_totals();
+        wp_send_json_success( [
+            'count' => WC()->cart->get_cart_contents_count(),
+            'total' => WC()->cart->get_total(),
+        ] );
     }
 
     /**
@@ -126,7 +205,7 @@ class CGV_Shortcode {
     }
 
     /**
-     * Ensure the configured product is the only item in the cart.
+     * Preserve the existing single-product shortcode cart behavior.
      */
     protected static function ensure_cart( $product_id ) {
         if ( ! WC()->cart ) {

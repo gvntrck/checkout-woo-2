@@ -98,7 +98,88 @@
             });
         });
 
-        // 4. After WC AJAX fragment refresh, restore visual tab selection ----
+        // 4. General checkout cart controls ---------------------------------
+        var updateCart = function (payload) {
+            if (!CGV || !CGV.ajax_url || !CGV.cart_nonce) {
+                return;
+            }
+            $card.addClass('is-updating');
+            $card.find('.cgv-cart-feedback').remove();
+            $.post(CGV.ajax_url, $.extend({
+                action: 'cgv_update_cart',
+                nonce: CGV.cart_nonce
+            }, payload)).done(function (response) {
+                if (response && response.success) {
+                    window.location.reload();
+                    return;
+                }
+                var message = response && response.data && response.data.message ? response.data.message : 'Erro ao atualizar o carrinho.';
+                $('<div class="cgv-cart-feedback" />').text(message).prependTo($card);
+            }).fail(function () {
+                $('<div class="cgv-cart-feedback" />').text('Erro ao atualizar o carrinho.').prependTo($card);
+            }).always(function () {
+                $card.removeClass('is-updating');
+            });
+        };
+
+        $card.on('click', '[data-cgv-cart-action="increase"], [data-cgv-cart-action="decrease"]', function () {
+            var $item = $(this).closest('.cgv-cart-item');
+            var $qty = $item.find('.cgv-qty-input');
+            var current = parseInt($qty.val(), 10) || 0;
+            var next = $(this).data('cgv-cart-action') === 'increase' ? current + 1 : Math.max(0, current - 1);
+            $qty.val(next);
+            updateCart({
+                cart_action: 'set_quantity',
+                cart_item_key: $item.data('cart-item-key'),
+                quantity: next
+            });
+        });
+
+        $card.on('change blur', '.cgv-qty-input', function () {
+            var $item = $(this).closest('.cgv-cart-item');
+            var next = Math.max(0, parseInt(this.value, 10) || 0);
+            this.value = next;
+            updateCart({
+                cart_action: 'set_quantity',
+                cart_item_key: $item.data('cart-item-key'),
+                quantity: next
+            });
+        });
+
+        $card.on('click', '[data-cgv-cart-action="remove_item"]', function () {
+            var $item = $(this).closest('.cgv-cart-item');
+            updateCart({
+                cart_action: 'remove_item',
+                cart_item_key: $item.data('cart-item-key')
+            });
+        });
+
+        $card.on('click', '[data-cgv-cart-action="apply_coupon"]', function () {
+            var code = $.trim($card.find('#cgv-coupon-code').val() || '');
+            if (!code) {
+                return;
+            }
+            updateCart({
+                cart_action: 'apply_coupon',
+                coupon_code: code
+            });
+        });
+
+        $card.on('click', '[data-cgv-cart-action="remove_coupon"]', function () {
+            updateCart({
+                cart_action: 'remove_coupon',
+                coupon_code: $(this).data('coupon-code')
+            });
+        });
+
+        $card.on('keydown', '#cgv-coupon-code', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                $card.find('[data-cgv-cart-action="apply_coupon"]').trigger('click');
+            }
+        });
+
+        // 5. After WC AJAX fragment refresh, restore visual tab selection ----
         $(document.body).on('updated_checkout', function () {
             var $active = $card.find('.cgv-tab.is-active');
             if (!$active.length) {
@@ -113,7 +194,7 @@
             $card.find('.payment_method_' + gw + ' .payment_box').show();
         });
 
-        // 5. Override final thank-you redirect, if configured -----------------
+        // 6. Override final thank-you redirect, if configured -----------------
         if (CGV && CGV.thank_you_url) {
             $(document.body).on('checkout_place_order', function () { return true; });
             // wc-checkout.js follows result.redirect verbatim. We hijack the

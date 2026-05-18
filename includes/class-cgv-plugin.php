@@ -68,6 +68,8 @@ class CGV_Plugin {
         return [
             'product_id'        => 0,
             'thank_you_url'     => '',
+            'empty_cart_home_url' => home_url( '/' ),
+            'show_coupon_field' => 0,
             'gateway_card'      => '',
             'gateway_pix'       => '',
             'gateway_boleto'    => '',

@@ -63,6 +63,29 @@
     border-radius: var(--cgv-radius-sm);
     font-size: 14px;
 }
+.cgv-empty-warning p {
+    margin: 0 0 12px;
+}
+.cgv-empty-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0 14px;
+    border-radius: var(--cgv-radius-sm);
+    background: var(--cgv-primary);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+}
+.cgv-empty-button:hover,
+.cgv-empty-button:focus {
+    color: #fff;
+    filter: brightness(1.06);
+}
+.cgv-card-general {
+    max-width: 680px;
+}
 
 /* Sections */
 .cgv-section {
@@ -272,6 +295,150 @@
     color: inherit;
     font-weight: inherit;
 }
+.cgv-cart-items {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--cgv-border);
+}
+.cgv-cart-item {
+    display: grid;
+    gap: 10px;
+}
+.cgv-cart-item + .cgv-cart-item {
+    padding-top: 12px;
+    border-top: 1px solid color-mix(in srgb, var(--cgv-border) 70%, transparent);
+}
+.cgv-cart-item-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+.cgv-cart-item-name {
+    color: var(--cgv-primary);
+    font-weight: 600;
+}
+.cgv-cart-item-name a {
+    color: inherit;
+    text-decoration: none;
+}
+.cgv-cart-item-name a:hover {
+    text-decoration: underline;
+}
+.cgv-cart-item-price {
+    white-space: nowrap;
+    color: var(--cgv-primary);
+    font-weight: 700;
+}
+.cgv-cart-item-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+.cgv-qty-control {
+    display: inline-grid;
+    grid-template-columns: 34px 48px 34px;
+    align-items: center;
+    overflow: hidden;
+    border: 1px solid var(--cgv-border);
+    border-radius: var(--cgv-radius-sm);
+    background: #fff;
+}
+.cgv-qty-btn,
+.cgv-coupon-apply,
+.cgv-coupon-chip,
+.cgv-remove-item {
+    appearance: none;
+    font: inherit;
+    cursor: pointer;
+}
+.cgv-qty-btn {
+    width: 34px;
+    height: 34px;
+    border: 0;
+    background: #fff;
+    color: var(--cgv-primary);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1;
+}
+.cgv-qty-btn:hover {
+    background: var(--cgv-input-bg);
+}
+.cgv-qty-input {
+    width: 48px;
+    height: 34px;
+    border: 0;
+    border-left: 1px solid var(--cgv-border);
+    border-right: 1px solid var(--cgv-border);
+    text-align: center;
+    font: inherit;
+    color: var(--cgv-text);
+    background: #fff;
+}
+.cgv-remove-item {
+    border: 0;
+    background: transparent;
+    color: #93000a;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 4px 0;
+}
+.cgv-remove-item:hover {
+    text-decoration: underline;
+}
+.cgv-coupon {
+    margin: 0 0 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--cgv-border);
+}
+.cgv-coupon-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+}
+.cgv-coupon-apply {
+    border: 0;
+    border-radius: var(--cgv-radius-sm);
+    padding: 0 14px;
+    background: var(--cgv-primary);
+    color: #fff;
+    font-weight: 600;
+}
+.cgv-coupon-apply:hover {
+    filter: brightness(1.06);
+}
+.cgv-applied-coupons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+.cgv-coupon-chip {
+    border: 1px solid var(--cgv-border);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--cgv-primary);
+    padding: 5px 9px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.cgv-cart-feedback {
+    margin-bottom: 14px;
+    padding: 12px 14px;
+    border-radius: var(--cgv-radius-sm);
+    background: #fdecea;
+    color: #93000a;
+    border: 1px solid #f5c2c7;
+    font-size: 14px;
+}
+.cgv-card.is-updating {
+    opacity: .72;
+    pointer-events: none;
+}
 
 /* Submit button */
 .cgv-submit-wrap {
@@ -378,6 +545,15 @@
     .cgv-card-title { font-size: 18px; }
     .cgv-tab { font-size: 13px; padding: 11px 4px; }
     .cgv-summary-total strong { font-size: 20px; }
+    .cgv-cart-item-main,
+    .cgv-cart-item-actions,
+    .cgv-coupon-row {
+        grid-template-columns: 1fr;
+        display: grid;
+    }
+    .cgv-cart-item-price {
+        white-space: normal;
+    }
     .cgv-badges { gap: 6px; }
     .cgv-badge-text { font-size: 9px; }
 }

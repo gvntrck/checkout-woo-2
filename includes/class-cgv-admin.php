@@ -71,8 +71,10 @@ class CGV_Admin {
             <h1><?php esc_html_e( 'Checkout GVNTRCK', 'checkout-gvntrck' ); ?></h1>
 
             <div class="cgv-shortcode-hint">
-                <strong><?php esc_html_e( 'Shortcode:', 'checkout-gvntrck' ); ?></strong>
+                <strong><?php esc_html_e( 'Shortcodes:', 'checkout-gvntrck' ); ?></strong>
                 <code>[checkout-gvntrck]</code>
+                <code>[checkout-gvntrck product_id="123"]</code>
+                <code>[checkout-gvntrck-geral]</code>
             </div>
 
             <h2 class="nav-tab-wrapper">
@@ -152,6 +154,24 @@ class CGV_Admin {
                         <p class="description"><?php esc_html_e( 'Após o pagamento bem-sucedido o cliente será redirecionado para esta URL. Deixe em branco para usar a página de obrigado padrão do WooCommerce. As variáveis order_id e key são adicionadas automaticamente.', 'checkout-gvntrck' ); ?></p>
                     </td>
                 </tr>
+                <tr>
+                    <th><label for="empty_cart_home_url"><?php esc_html_e( 'URL do botão de carrinho vazio', 'checkout-gvntrck' ); ?></label></th>
+                    <td>
+                        <input type="url" id="empty_cart_home_url" name="empty_cart_home_url" class="regular-text"
+                               value="<?php echo esc_attr( $s['empty_cart_home_url'] ); ?>"
+                               placeholder="<?php echo esc_attr( home_url( '/' ) ); ?>" />
+                        <p class="description"><?php esc_html_e( 'Usada no shortcode geral quando o carrinho estiver vazio.', 'checkout-gvntrck' ); ?></p>
+                    </td>
+                </tr>
+                <tr>
+                    <th><?php esc_html_e( 'Cupom no checkout geral', 'checkout-gvntrck' ); ?></th>
+                    <td>
+                        <label>
+                            <input type="checkbox" name="show_coupon_field" value="1" <?php checked( ! empty( $s['show_coupon_field'] ) ); ?> />
+                            <?php esc_html_e( 'Exibir campo de cupom em [checkout-gvntrck-geral]', 'checkout-gvntrck' ); ?>
+                        </label>
+                    </td>
+                </tr>
             </table>
 
             <h2><?php esc_html_e( 'Abas de Pagamento', 'checkout-gvntrck' ); ?></h2>
@@ -206,6 +226,8 @@ class CGV_Admin {
 
         $current['product_id']    = isset( $_POST['product_id'] ) ? absint( wp_unslash( $_POST['product_id'] ) ) : 0;
         $current['thank_you_url'] = isset( $_POST['thank_you_url'] ) ? esc_url_raw( wp_unslash( $_POST['thank_you_url'] ) ) : '';
+        $current['empty_cart_home_url'] = isset( $_POST['empty_cart_home_url'] ) ? esc_url_raw( wp_unslash( $_POST['empty_cart_home_url'] ) ) : home_url( '/' );
+        $current['show_coupon_field'] = ! empty( $_POST['show_coupon_field'] ) ? 1 : 0;
 
         foreach ( [ 'card', 'pix', 'boleto' ] as $k ) {
             $current[ 'tab_' . $k . '_enabled' ] = ! empty( $_POST[ 'tab_' . $k . '_enabled' ] ) ? 1 : 0;

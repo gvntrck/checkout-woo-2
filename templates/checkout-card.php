@@ -6,6 +6,7 @@
  *
  * @var array $settings
  * @var array $fields
+ * @var string $checkout_mode
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -14,6 +15,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $settings = isset( $settings ) ? $settings : CGV_Plugin::get_settings();
 $fields   = isset( $fields ) ? $fields : CGV_Fields::get_fields();
+$checkout_mode = isset( $checkout_mode ) ? $checkout_mode : 'single';
+$is_general_checkout = 'general' === $checkout_mode;
 
 $available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
 
@@ -57,6 +60,7 @@ $cart      = WC()->cart;
 $cart_total = $cart ? wc_price( $cart->get_total( 'edit' ) ) : '';
 $cart_subtotal = $cart ? wc_price( $cart->get_subtotal() ) : '';
 $has_items = $cart && $cart->get_cart_contents_count() > 0;
+$applied_coupons = $cart ? $cart->get_applied_coupons() : [];
 
 $root_style = sprintf(
     '--cgv-primary:%s;--cgv-accent:%s;--cgv-card-bg:%s;',
@@ -68,15 +72,30 @@ $root_classes = 'cgv-card';
 if ( ! empty( $settings['enable_pulse'] ) ) {
     $root_classes .= ' cgv-pulse';
 }
+$root_classes .= $is_general_checkout ? ' cgv-card-general' : ' cgv-card-single';
 ?>
-<div class="<?php echo esc_attr( $root_classes ); ?>" style="<?php echo $root_style; // phpcs:ignore WordPress.Security.EscapeOutput ?>">
+<div class="<?php echo esc_attr( $root_classes ); ?>" data-cgv-mode="<?php echo esc_attr( $checkout_mode ); ?>" style="<?php echo $root_style; // phpcs:ignore WordPress.Security.EscapeOutput ?>">
     <?php if ( ! $has_items ) : ?>
         <div class="cgv-empty-warning">
-            <?php esc_html_e( 'Nenhum produto disponível para checkout. Configure um produto nas opções do plugin.', 'checkout-gvntrck' ); ?>
+            <p>
+                <?php
+                echo esc_html(
+                    $is_general_checkout
+                        ? __( 'Seu carrinho está vazio.', 'checkout-gvntrck' )
+                        : __( 'Nenhum produto disponível para checkout. Configure um produto nas opções do plugin.', 'checkout-gvntrck' )
+                );
+                ?>
+            </p>
+            <?php if ( $is_general_checkout ) : ?>
+                <a class="cgv-empty-button" href="<?php echo esc_url( $settings['empty_cart_home_url'] ?: home_url( '/' ) ); ?>">
+                    <?php esc_html_e( 'Ir para a home', 'checkout-gvntrck' ); ?>
+                </a>
+            <?php endif; ?>
         </div>
     <?php else : ?>
     <form name="checkout" method="post" class="checkout woocommerce-checkout cgv-form" enctype="multipart/form-data" novalidate>
         <input type="hidden" name="cgv_checkout" value="1" />
+        <input type="hidden" name="cgv_checkout_mode" value="<?php echo esc_attr( $checkout_mode ); ?>" />
         <input type="hidden" name="woocommerce-process-checkout-nonce" value="<?php echo esc_attr( wp_create_nonce( 'woocommerce-process_checkout' ) ); ?>" />
         <input type="hidden" name="_wp_http_referer" value="<?php echo esc_attr( wc_get_checkout_url() ); ?>" />
         <input type="hidden" name="terms" value="1" />
@@ -203,10 +222,78 @@ if ( ! empty( $settings['enable_pulse'] ) ) {
 
                 <!-- Order summary -->
                 <div class="cgv-summary">
+                    <?php if ( $is_general_checkout ) : ?>
+                        <div class="cgv-cart-items">
+                            <?php foreach ( $cart->get_cart() as $cart_item_key => $cart_item ) :
+                                $product = $cart_item['data'] ?? null;
+                                if ( ! $product || ! $product->exists() || $cart_item['quantity'] <= 0 ) {
+                                    continue;
+                                }
+                                $product_permalink = $product->is_visible() ? $product->get_permalink( $cart_item ) : '';
+                                ?>
+                                <div class="cgv-cart-item" data-cart-item-key="<?php echo esc_attr( $cart_item_key ); ?>">
+                                    <div class="cgv-cart-item-main">
+                                        <span class="cgv-cart-item-name">
+                                            <?php if ( $product_permalink ) : ?>
+                                                <a href="<?php echo esc_url( $product_permalink ); ?>"><?php echo esc_html( $product->get_name() ); ?></a>
+                                            <?php else : ?>
+                                                <?php echo esc_html( $product->get_name() ); ?>
+                                            <?php endif; ?>
+                                        </span>
+                                        <span class="cgv-cart-item-price"><?php echo wp_kses_post( WC()->cart->get_product_subtotal( $product, $cart_item['quantity'] ) ); ?></span>
+                                    </div>
+                                    <div class="cgv-cart-item-actions">
+                                        <div class="cgv-qty-control" aria-label="<?php esc_attr_e( 'Quantidade', 'checkout-gvntrck' ); ?>">
+                                            <button type="button" class="cgv-qty-btn" data-cgv-cart-action="decrease" aria-label="<?php esc_attr_e( 'Diminuir quantidade', 'checkout-gvntrck' ); ?>">-</button>
+                                            <input
+                                                class="cgv-qty-input"
+                                                type="number"
+                                                min="0"
+                                                step="1"
+                                                inputmode="numeric"
+                                                value="<?php echo esc_attr( $cart_item['quantity'] ); ?>"
+                                                aria-label="<?php esc_attr_e( 'Quantidade', 'checkout-gvntrck' ); ?>"
+                                            />
+                                            <button type="button" class="cgv-qty-btn" data-cgv-cart-action="increase" aria-label="<?php esc_attr_e( 'Aumentar quantidade', 'checkout-gvntrck' ); ?>">+</button>
+                                        </div>
+                                        <button type="button" class="cgv-remove-item" data-cgv-cart-action="remove_item">
+                                            <?php esc_html_e( 'Remover', 'checkout-gvntrck' ); ?>
+                                        </button>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+
+                        <?php if ( ! empty( $settings['show_coupon_field'] ) ) : ?>
+                            <div class="cgv-coupon">
+                                <label class="cgv-label" for="cgv-coupon-code"><?php esc_html_e( 'Cupom de desconto', 'checkout-gvntrck' ); ?></label>
+                                <div class="cgv-coupon-row">
+                                    <input id="cgv-coupon-code" class="cgv-input" type="text" autocomplete="off" placeholder="<?php esc_attr_e( 'Digite seu cupom', 'checkout-gvntrck' ); ?>" />
+                                    <button type="button" class="cgv-coupon-apply" data-cgv-cart-action="apply_coupon"><?php esc_html_e( 'Aplicar', 'checkout-gvntrck' ); ?></button>
+                                </div>
+                                <?php if ( ! empty( $applied_coupons ) ) : ?>
+                                    <div class="cgv-applied-coupons">
+                                        <?php foreach ( $applied_coupons as $coupon_code ) : ?>
+                                            <button type="button" class="cgv-coupon-chip" data-cgv-cart-action="remove_coupon" data-coupon-code="<?php echo esc_attr( $coupon_code ); ?>">
+                                                <?php echo esc_html( $coupon_code ); ?> <span aria-hidden="true">x</span>
+                                            </button>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
+                    <?php endif; ?>
+
                     <div class="cgv-summary-row">
                         <span><?php echo esc_html( $settings['summary_label'] ); ?></span>
                         <span><?php echo wp_kses_post( $cart_subtotal ); ?></span>
                     </div>
+                    <?php if ( $is_general_checkout && $cart->get_discount_total() > 0 ) : ?>
+                        <div class="cgv-summary-row">
+                            <span><?php esc_html_e( 'Desconto', 'checkout-gvntrck' ); ?></span>
+                            <span>-<?php echo wp_kses_post( wc_price( $cart->get_discount_total() ) ); ?></span>
+                        </div>
+                    <?php endif; ?>
                     <div class="cgv-summary-row cgv-summary-total">
                         <span><?php echo esc_html( $settings['total_label'] ); ?></span>
                         <strong><?php echo wp_kses_post( $cart_total ); ?></strong>
