@@ -1,0 +1,17 @@
+# Ignorar arquivos compactados do plugin
+*.zip
+
+# Arquivos do sistema operacional
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# IDEs e editores de código
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Logs e arquivos de cache
+*.log
