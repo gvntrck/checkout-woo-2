@@ -51,25 +51,33 @@ class CGV_Shortcode {
         $atts = shortcode_atts(
             [
                 'product_id' => 0,
+                'layout'     => '',
             ],
             $atts,
             'checkout-gvntrck'
         );
 
-        return self::render_checkout( 'single', absint( $atts['product_id'] ) );
+        return self::render_checkout( 'single', absint( $atts['product_id'] ), sanitize_text_field( $atts['layout'] ) );
     }
 
     /**
      * Render the general checkout shortcode.
      */
     public static function render_general( $atts = [] ) {
-        return self::render_checkout( 'general' );
+        $atts = shortcode_atts(
+            [
+                'layout' => '',
+            ],
+            $atts,
+            'checkout-gvntrck-geral'
+        );
+        return self::render_checkout( 'general', 0, sanitize_text_field( $atts['layout'] ) );
     }
 
     /**
      * Render checkout by mode.
      */
-    protected static function render_checkout( $mode = 'single', $shortcode_product_id = 0 ) {
+    protected static function render_checkout( $mode = 'single', $shortcode_product_id = 0, $shortcode_layout = '' ) {
         if ( ! class_exists( 'WooCommerce' ) ) {
             return '';
         }
@@ -92,6 +100,33 @@ class CGV_Shortcode {
         $product_id = $shortcode_product_id ? $shortcode_product_id : absint( $settings['product_id'] );
         if ( 'single' === $mode && $product_id ) {
             self::ensure_cart( $product_id );
+        }
+
+        // Determinar se split layout está ativo
+        $split_layout = false;
+        if ( 'split' === $shortcode_layout ) {
+            $split_layout = true;
+        } elseif ( 'default' === $shortcode_layout ) {
+            $split_layout = false;
+        } else {
+            $split_layout = ! empty( $settings['split_layout'] );
+        }
+
+        // Buscar informações do produto principal para exibir no resumo esquerdo
+        $main_product = null;
+        if ( $split_layout ) {
+            if ( 'single' === $mode && $product_id ) {
+                $main_product = wc_get_product( $product_id );
+            } else {
+                // Modo geral: buscar primeiro item do carrinho
+                if ( WC()->cart && ! WC()->cart->is_empty() ) {
+                    $cart_items = WC()->cart->get_cart();
+                    $first_item = reset( $cart_items );
+                    if ( isset( $first_item['data'] ) ) {
+                        $main_product = $first_item['data'];
+                    }
+                }
+            }
         }
 
         // Localize plugin-specific data.

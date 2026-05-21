@@ -17,6 +17,8 @@ $settings = isset( $settings ) ? $settings : CGV_Plugin::get_settings();
 $fields   = isset( $fields ) ? $fields : CGV_Fields::get_fields();
 $checkout_mode = isset( $checkout_mode ) ? $checkout_mode : 'single';
 $is_general_checkout = 'general' === $checkout_mode;
+$split_layout = isset( $split_layout ) ? $split_layout : false;
+$main_product = isset( $main_product ) ? $main_product : null;
 
 $available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
 
@@ -91,6 +93,9 @@ if ( ! empty( $settings['enable_pulse'] ) ) {
     $root_classes .= ' cgv-pulse';
 }
 $root_classes .= $is_general_checkout ? ' cgv-card-general' : ' cgv-card-single';
+if ( $split_layout ) {
+    $root_classes .= ' cgv-layout-split';
+}
 ?>
 <div class="<?php echo esc_attr( $root_classes ); ?>" data-cgv-mode="<?php echo esc_attr( $checkout_mode ); ?>" style="<?php echo $root_style; // phpcs:ignore WordPress.Security.EscapeOutput ?>">
     <?php if ( ! $has_items ) : ?>
@@ -111,7 +116,68 @@ $root_classes .= $is_general_checkout ? ' cgv-card-general' : ' cgv-card-single'
             <?php endif; ?>
         </div>
     <?php else : ?>
-    <form name="checkout" method="post" class="checkout woocommerce-checkout cgv-form" enctype="multipart/form-data" novalidate>
+        <?php if ( $split_layout ) : ?>
+            <div class="cgv-split-container">
+                <div class="cgv-split-left">
+                    <div class="cgv-left-logo-wrap">
+                        <?php
+                        if ( ! empty( $settings['checkout_logo'] ) ) {
+                            echo '<img src="' . esc_url( $settings['checkout_logo'] ) . '" alt="' . esc_attr( get_bloginfo( 'name' ) ) . '" class="cgv-checkout-logo-img" />';
+                        } elseif ( has_custom_logo() ) {
+                            the_custom_logo();
+                        } else {
+                            echo '<a href="' . esc_url( home_url( '/' ) ) . '" class="cgv-checkout-logo-text">' . esc_html( get_bloginfo( 'name' ) ) . '</a>';
+                        }
+                        ?>
+                    </div>
+
+                    <div class="cgv-left-secure-badge">
+                        <span class="material-symbols-outlined cgv-icon">shield_lock</span>
+                        <span>COMPRA SEGURA</span>
+                    </div>
+
+                    <?php if ( $main_product ) : 
+                        $product_image_id = $main_product->get_image_id();
+                        $product_image_url = wp_get_attachment_image_url( $product_image_id, 'large' );
+                        if ( ! $product_image_url ) {
+                            $product_image_url = wc_placeholder_img_src( 'large' );
+                        }
+                        $product_name = $main_product->get_name();
+                        ?>
+                        <div class="cgv-left-product-image-wrap">
+                            <img src="<?php echo esc_url( $product_image_url ); ?>" alt="<?php echo esc_attr( $product_name ); ?>" class="cgv-left-product-image" />
+                        </div>
+                        <h3 class="cgv-left-product-name"><?php echo esc_html( $product_name ); ?></h3>
+                    <?php endif; ?>
+
+                    <div class="cgv-left-summary-table">
+                        <div class="cgv-left-summary-row cgv-left-item-row">
+                            <span class="cgv-left-summary-label">
+                                <span class="material-symbols-outlined cgv-icon">shopping_cart</span>
+                                <?php echo esc_html( $main_product ? $main_product->get_name() : __( 'Produto', 'checkout-gvntrck' ) ); ?>
+                            </span>
+                            <span class="cgv-left-summary-value cgv-left-product-price">
+                                <?php echo wp_kses_post( $cart_subtotal ); ?>
+                            </span>
+                        </div>
+
+                        <?php if ( $is_general_checkout && $cart->get_discount_total() > 0 ) : ?>
+                            <div class="cgv-left-summary-row cgv-left-discount-row">
+                                <span class="cgv-left-summary-label"><?php esc_html_e( 'Desconto', 'checkout-gvntrck' ); ?></span>
+                                <span class="cgv-left-summary-value cgv-left-discount-value">-<?php echo wp_kses_post( wc_price( $cart->get_discount_total() ) ); ?></span>
+                            </div>
+                        <?php endif; ?>
+
+                        <div class="cgv-left-summary-row cgv-left-total-row">
+                            <span class="cgv-left-summary-label"><?php echo esc_html( $settings['total_label'] ); ?></span>
+                            <span class="cgv-left-summary-value cgv-left-cart-total"><?php echo wp_kses_post( $cart_total ); ?></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="cgv-split-right">
+        <?php endif; ?>
+
+        <form name="checkout" method="post" class="checkout woocommerce-checkout cgv-form" enctype="multipart/form-data" novalidate>
         <input type="hidden" name="cgv_checkout" value="1" />
         <input type="hidden" name="cgv_checkout_mode" value="<?php echo esc_attr( $checkout_mode ); ?>" />
         <input type="hidden" name="woocommerce-process-checkout-nonce" value="<?php echo esc_attr( wp_create_nonce( 'woocommerce-process_checkout' ) ); ?>" />
@@ -355,5 +421,9 @@ $root_classes .= $is_general_checkout ? ' cgv-card-general' : ' cgv-card-single'
             <?php endfor; ?>
         </div>
     </form>
+        <?php if ( $split_layout ) : ?>
+                </div><!-- .cgv-split-right -->
+            </div><!-- .cgv-split-container -->
+        <?php endif; ?>
     <?php endif; ?>
 </div>

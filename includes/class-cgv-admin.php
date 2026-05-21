@@ -362,6 +362,27 @@ class CGV_Admin {
             <?php wp_nonce_field( 'cgv_save_layout' ); ?>
             <input type="hidden" name="action" value="cgv_save_layout" />
 
+            <h2><?php esc_html_e( 'Layout do Checkout', 'checkout-gvntrck' ); ?></h2>
+            <table class="form-table">
+                <tr>
+                    <th><?php esc_html_e( 'Layout em duas colunas (Split)', 'checkout-gvntrck' ); ?></th>
+                    <td>
+                        <label>
+                            <input type="checkbox" name="split_layout" value="1" <?php checked( ! empty( $s['split_layout'] ) ); ?> />
+                            <?php esc_html_e( 'Ativar por padrão', 'checkout-gvntrck' ); ?>
+                        </label>
+                        <p class="description"><?php esc_html_e( 'Se ativado, divide o checkout em duas colunas (resumo fixo à esquerda e formulário à direita). Pode ser sobrescrito individualmente via atributo do shortcode.', 'checkout-gvntrck' ); ?></p>
+                    </td>
+                </tr>
+                <tr>
+                    <th><label for="checkout_logo"><?php esc_html_e( 'Logo do Checkout (URL)', 'checkout-gvntrck' ); ?></label></th>
+                    <td>
+                        <input type="url" id="checkout_logo" name="checkout_logo" class="regular-text" value="<?php echo esc_url( $s['checkout_logo'] ); ?>" />
+                        <p class="description"><?php esc_html_e( 'Insira a URL de um logo personalizado para exibir no topo do resumo esquerdo. Deixe em branco para usar o logo padrão do WordPress ou o nome do site.', 'checkout-gvntrck' ); ?></p>
+                    </td>
+                </tr>
+            </table>
+
             <h2><?php esc_html_e( 'Cores', 'checkout-gvntrck' ); ?></h2>
             <table class="form-table">
                 <tr>
@@ -576,6 +597,8 @@ class CGV_Admin {
         }
 
         $current['enable_pulse'] = ! empty( $_POST['enable_pulse'] ) ? 1 : 0;
+        $current['split_layout'] = ! empty( $_POST['split_layout'] ) ? 1 : 0;
+        $current['checkout_logo'] = isset( $_POST['checkout_logo'] ) ? esc_url_raw( wp_unslash( $_POST['checkout_logo'] ) ) : '';
 
         foreach ( [ 'card_max_width_single', 'card_max_width_general' ] as $w ) {
             if ( isset( $_POST[ $w ] ) ) {

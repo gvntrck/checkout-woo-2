@@ -115,6 +115,10 @@ class CGV_Plugin {
             'card_border_color_general'   => '#c6c6cd',
             'card_radius_general'         => 12,
             'card_shadow_enabled_general' => 1,
+
+            // Layout Split (Duas Colunas)
+            'split_layout'                => 0,
+            'checkout_logo'               => '',
         ];
     }
 

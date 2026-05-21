@@ -567,3 +567,171 @@
     .cgv-badges { gap: 6px; }
     .cgv-badge-text { font-size: 9px; }
 }
+
+/* ===========================================================
+   Split Layout (Duas Colunas)
+   =========================================================== */
+.cgv-split-left {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+.cgv-left-logo-wrap {
+    margin-bottom: 15px;
+}
+.cgv-checkout-logo-img {
+    max-height: 48px;
+    width: auto;
+    display: block;
+    margin: 0 auto;
+}
+.cgv-checkout-logo-text {
+    font-family: 'Hanken Grotesk', 'Inter', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--cgv-primary);
+    text-decoration: none;
+    text-align: center;
+    display: block;
+}
+.cgv-left-secure-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: rgba(19, 27, 46, 0.04);
+    color: var(--cgv-muted);
+    padding: 8px 18px;
+    border-radius: 30px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    margin: 0 auto 25px;
+    width: fit-content;
+}
+.cgv-left-secure-badge .cgv-icon {
+    color: #00875a;
+    font-size: 16px;
+}
+.cgv-left-product-image-wrap {
+    max-width: 280px;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    margin: 0 auto 20px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(19, 27, 46, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+}
+.cgv-left-product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.cgv-left-product-name {
+    font-family: 'Hanken Grotesk', 'Inter', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--cgv-primary);
+    margin: 0 auto 25px;
+    text-align: center;
+}
+.cgv-left-summary-table {
+    max-width: 320px;
+    width: 100%;
+    margin: 0 auto;
+}
+.cgv-left-summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    color: var(--cgv-muted);
+    padding: 10px 0;
+}
+.cgv-left-summary-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.cgv-left-summary-label .cgv-icon {
+    font-size: 18px;
+    color: var(--cgv-muted);
+}
+.cgv-left-summary-value {
+    font-weight: 600;
+    color: var(--cgv-primary);
+}
+.cgv-left-item-row {
+    border-bottom: 1px solid var(--cgv-border);
+    padding-bottom: 14px;
+    margin-bottom: 6px;
+}
+.cgv-left-discount-row {
+    color: #00875a;
+    border-bottom: 1px solid var(--cgv-border);
+    padding-bottom: 14px;
+    margin-bottom: 6px;
+}
+.cgv-left-discount-value {
+    color: #00875a;
+}
+.cgv-left-total-row {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--cgv-primary);
+    padding-top: 14px;
+}
+.cgv-left-total-row .cgv-left-summary-label {
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+}
+.cgv-left-cart-total {
+    font-family: 'Hanken Grotesk', 'Inter', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--cgv-primary);
+}
+
+@media (min-width: 992px) {
+    .cgv-card.cgv-layout-split {
+        max-width: 1100px;
+        padding: 0;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+    .cgv-card.cgv-layout-split .cgv-split-container {
+        display: grid;
+        grid-template-columns: 1fr 1.15fr;
+        gap: 50px;
+        align-items: start;
+    }
+    .cgv-card.cgv-layout-split .cgv-split-left {
+        position: sticky;
+        top: 40px;
+        padding: 20px;
+    }
+    .cgv-card.cgv-layout-split .cgv-split-right {
+        background: var(--cgv-card-bg);
+        border: var(--cgv-border-width, 1px) solid var(--cgv-border);
+        border-radius: var(--cgv-radius);
+        box-shadow: var(--cgv-shadow);
+        padding: 28px;
+    }
+}
+
+@media (max-width: 991px) {
+    .cgv-split-container {
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+    }
+    .cgv-split-left {
+        padding-bottom: 25px;
+        border-bottom: 1px dashed var(--cgv-border);
+        margin-bottom: 5px;
+    }
+}

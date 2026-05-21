@@ -182,16 +182,53 @@
         // 5. After WC AJAX fragment refresh, restore visual tab selection ----
         $(document.body).on('updated_checkout', function () {
             var $active = $card.find('.cgv-tab.is-active');
-            if (!$active.length) {
-                return;
+            if ($active.length) {
+                var gw = $active.data('gateway');
+                var $radio = $card.find('input[name="payment_method"][value="' + gw + '"]');
+                if ($radio.length && !$radio.is(':checked')) {
+                    $radio.prop('checked', true);
+                }
+                $card.find('.payment_box').hide();
+                $card.find('.payment_method_' + gw + ' .payment_box').show();
             }
-            var gw = $active.data('gateway');
-            var $radio = $card.find('input[name="payment_method"][value="' + gw + '"]');
-            if ($radio.length && !$radio.is(':checked')) {
-                $radio.prop('checked', true);
+
+            // Sync left-side split summary total and discount with the right-side values
+            if ($card.hasClass('cgv-layout-split')) {
+                var rightSubtotal = $card.find('.cgv-form .cgv-summary-row:first-child span:last-child').html() || $card.find('.cgv-summary-row span:last-child').first().html();
+                var rightTotal = $card.find('.cgv-form .cgv-summary-total strong').html();
+                
+                if (rightSubtotal) {
+                    $card.find('.cgv-left-product-price').html(rightSubtotal);
+                }
+                if (rightTotal) {
+                    $card.find('.cgv-left-cart-total').html(rightTotal);
+                }
+
+                // Check for discount
+                var $rightDiscountRow = $card.find('.cgv-form .cgv-summary-row').filter(function() {
+                    var txt = $(this).text() || '';
+                    return txt.indexOf('Desconto') !== -1 || txt.indexOf('desconto') !== -1;
+                });
+                var $leftDiscountRow = $card.find('.cgv-left-discount-row');
+                
+                if ($rightDiscountRow.length) {
+                    var discountVal = $rightDiscountRow.find('span:last-child').html();
+                    if ($leftDiscountRow.length) {
+                        $leftDiscountRow.find('.cgv-left-discount-value').html(discountVal);
+                        $leftDiscountRow.show();
+                    } else {
+                        var discountHtml = '<div class="cgv-left-summary-row cgv-left-discount-row">' +
+                            '<span class="cgv-left-summary-label">Desconto</span>' +
+                            '<span class="cgv-left-summary-value cgv-left-discount-value">' + discountVal + '</span>' +
+                            '</div>';
+                        $card.find('.cgv-left-item-row').after(discountHtml);
+                    }
+                } else {
+                    if ($leftDiscountRow.length) {
+                        $leftDiscountRow.hide();
+                    }
+                }
             }
-            $card.find('.payment_box').hide();
-            $card.find('.payment_method_' + gw + ' .payment_box').show();
         });
 
         // 6. Override final thank-you redirect, if configured -----------------
