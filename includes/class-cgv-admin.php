@@ -382,6 +382,29 @@ class CGV_Admin {
                 </tr>
             </table>
 
+            <h2><?php esc_html_e( 'Largura do Card', 'checkout-gvntrck' ); ?></h2>
+            <p class="description"><?php esc_html_e( 'Defina a largura máxima (em pixels) do card de checkout. O card sempre se adapta a telas menores. Use 0 para remover o limite.', 'checkout-gvntrck' ); ?></p>
+            <table class="form-table">
+                <tr>
+                    <th><label for="card_max_width_single"><?php esc_html_e( 'Largura máxima — [checkout-gvntrck]', 'checkout-gvntrck' ); ?></label></th>
+                    <td>
+                        <input type="number" id="card_max_width_single" name="card_max_width_single" min="0" step="1"
+                               value="<?php echo esc_attr( (int) $s['card_max_width_single'] ); ?>" class="small-text" />
+                        <span>px</span>
+                        <p class="description"><?php esc_html_e( 'Largura usada no checkout de produto único. Padrão: 480px.', 'checkout-gvntrck' ); ?></p>
+                    </td>
+                </tr>
+                <tr>
+                    <th><label for="card_max_width_general"><?php esc_html_e( 'Largura máxima — [checkout-gvntrck-geral]', 'checkout-gvntrck' ); ?></label></th>
+                    <td>
+                        <input type="number" id="card_max_width_general" name="card_max_width_general" min="0" step="1"
+                               value="<?php echo esc_attr( (int) $s['card_max_width_general'] ); ?>" class="small-text" />
+                        <span>px</span>
+                        <p class="description"><?php esc_html_e( 'Largura usada no checkout geral do carrinho. Padrão: 680px.', 'checkout-gvntrck' ); ?></p>
+                    </td>
+                </tr>
+            </table>
+
             <h2><?php esc_html_e( 'Títulos e Ícones', 'checkout-gvntrck' ); ?></h2>
             <p class="description">
                 <?php
@@ -489,6 +512,12 @@ class CGV_Admin {
         }
 
         $current['enable_pulse'] = ! empty( $_POST['enable_pulse'] ) ? 1 : 0;
+
+        foreach ( [ 'card_max_width_single', 'card_max_width_general' ] as $w ) {
+            if ( isset( $_POST[ $w ] ) ) {
+                $current[ $w ] = max( 0, absint( wp_unslash( $_POST[ $w ] ) ) );
+            }
+        }
 
         update_option( 'cgv_settings', $current );
         add_settings_error( 'cgv_messages', 'cgv_saved', __( 'Layout salvo.', 'checkout-gvntrck' ), 'updated' );

@@ -99,6 +99,8 @@ class CGV_Plugin {
             'accent_color'      => '#006c49',
             'card_bg_color'     => '#ffffff',
             'enable_pulse'      => 1,
+            'card_max_width_single'  => 480,
+            'card_max_width_general' => 680,
         ];
     }
 

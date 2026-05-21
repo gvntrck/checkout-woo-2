@@ -24,7 +24,7 @@
     border-radius: var(--cgv-radius);
     box-shadow: var(--cgv-shadow);
     padding: 28px;
-    max-width: 480px;
+    max-width: var(--cgv-max-width, 480px);
     width: 100%;
     margin: 0 auto;
     box-sizing: border-box;
@@ -83,10 +83,6 @@
     color: #fff;
     filter: brightness(1.06);
 }
-.cgv-card-general {
-    max-width: 680px;
-}
-
 /* Sections */
 .cgv-section {
     margin-bottom: 28px;

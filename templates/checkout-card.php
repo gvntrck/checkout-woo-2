@@ -62,11 +62,16 @@ $cart_subtotal = $cart ? wc_price( $cart->get_subtotal() ) : '';
 $has_items = $cart && $cart->get_cart_contents_count() > 0;
 $applied_coupons = $cart ? $cart->get_applied_coupons() : [];
 
+$max_width_key = $is_general_checkout ? 'card_max_width_general' : 'card_max_width_single';
+$max_width_val = isset( $settings[ $max_width_key ] ) ? (int) $settings[ $max_width_key ] : 0;
+$max_width_css = $max_width_val > 0 ? $max_width_val . 'px' : 'none';
+
 $root_style = sprintf(
-    '--cgv-primary:%s;--cgv-accent:%s;--cgv-card-bg:%s;',
+    '--cgv-primary:%s;--cgv-accent:%s;--cgv-card-bg:%s;--cgv-max-width:%s;',
     esc_attr( $settings['primary_color'] ),
     esc_attr( $settings['accent_color'] ),
-    esc_attr( $settings['card_bg_color'] )
+    esc_attr( $settings['card_bg_color'] ),
+    esc_attr( $max_width_css )
 );
 $root_classes = 'cgv-card';
 if ( ! empty( $settings['enable_pulse'] ) ) {
