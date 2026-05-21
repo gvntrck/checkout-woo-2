@@ -405,6 +405,15 @@ class CGV_Admin {
                 </tr>
             </table>
 
+            <h2><?php esc_html_e( 'Borda e Sombra do Card', 'checkout-gvntrck' ); ?></h2>
+            <p class="description"><?php esc_html_e( 'Configure borda, raio dos cantos e sombra de forma independente para cada shortcode.', 'checkout-gvntrck' ); ?></p>
+
+            <h3><?php esc_html_e( '[checkout-gvntrck] (produto único)', 'checkout-gvntrck' ); ?></h3>
+            <?php self::render_card_style_rows( $s, 'single' ); ?>
+
+            <h3><?php esc_html_e( '[checkout-gvntrck-geral] (carrinho)', 'checkout-gvntrck' ); ?></h3>
+            <?php self::render_card_style_rows( $s, 'general' ); ?>
+
             <h2><?php esc_html_e( 'Títulos e Ícones', 'checkout-gvntrck' ); ?></h2>
             <p class="description">
                 <?php
@@ -481,6 +490,61 @@ class CGV_Admin {
         <?php
     }
 
+    /**
+     * Renderiza os campos de borda/sombra para um modo específico (single|general).
+     */
+    protected static function render_card_style_rows( $s, $mode ) {
+        $border_enabled = 'card_border_enabled_' . $mode;
+        $border_width   = 'card_border_width_' . $mode;
+        $border_color   = 'card_border_color_' . $mode;
+        $radius         = 'card_radius_' . $mode;
+        $shadow_enabled = 'card_shadow_enabled_' . $mode;
+        ?>
+        <table class="form-table">
+            <tr>
+                <th><?php esc_html_e( 'Borda', 'checkout-gvntrck' ); ?></th>
+                <td>
+                    <label>
+                        <input type="checkbox" name="<?php echo esc_attr( $border_enabled ); ?>" value="1" <?php checked( ! empty( $s[ $border_enabled ] ) ); ?> />
+                        <?php esc_html_e( 'Exibir borda', 'checkout-gvntrck' ); ?>
+                    </label>
+                </td>
+            </tr>
+            <tr>
+                <th><label for="<?php echo esc_attr( $border_width ); ?>"><?php esc_html_e( 'Espessura da borda', 'checkout-gvntrck' ); ?></label></th>
+                <td>
+                    <input type="number" id="<?php echo esc_attr( $border_width ); ?>" name="<?php echo esc_attr( $border_width ); ?>" min="0" step="1"
+                           value="<?php echo esc_attr( (int) $s[ $border_width ] ); ?>" class="small-text" />
+                    <span>px</span>
+                </td>
+            </tr>
+            <tr>
+                <th><label><?php esc_html_e( 'Cor da borda', 'checkout-gvntrck' ); ?></label></th>
+                <td>
+                    <input type="text" class="cgv-color" name="<?php echo esc_attr( $border_color ); ?>" value="<?php echo esc_attr( $s[ $border_color ] ); ?>" />
+                </td>
+            </tr>
+            <tr>
+                <th><label for="<?php echo esc_attr( $radius ); ?>"><?php esc_html_e( 'Raio dos cantos', 'checkout-gvntrck' ); ?></label></th>
+                <td>
+                    <input type="number" id="<?php echo esc_attr( $radius ); ?>" name="<?php echo esc_attr( $radius ); ?>" min="0" step="1"
+                           value="<?php echo esc_attr( (int) $s[ $radius ] ); ?>" class="small-text" />
+                    <span>px</span>
+                </td>
+            </tr>
+            <tr>
+                <th><?php esc_html_e( 'Sombra', 'checkout-gvntrck' ); ?></th>
+                <td>
+                    <label>
+                        <input type="checkbox" name="<?php echo esc_attr( $shadow_enabled ); ?>" value="1" <?php checked( ! empty( $s[ $shadow_enabled ] ) ); ?> />
+                        <?php esc_html_e( 'Exibir sombra', 'checkout-gvntrck' ); ?>
+                    </label>
+                </td>
+            </tr>
+        </table>
+        <?php
+    }
+
     public static function save_layout() {
         if ( ! current_user_can( self::CAPABILITY ) ) {
             wp_die( esc_html__( 'Permissão negada.', 'checkout-gvntrck' ) );
@@ -516,6 +580,26 @@ class CGV_Admin {
         foreach ( [ 'card_max_width_single', 'card_max_width_general' ] as $w ) {
             if ( isset( $_POST[ $w ] ) ) {
                 $current[ $w ] = max( 0, absint( wp_unslash( $_POST[ $w ] ) ) );
+            }
+        }
+
+        foreach ( [ 'single', 'general' ] as $mode ) {
+            $current[ 'card_border_enabled_' . $mode ] = ! empty( $_POST[ 'card_border_enabled_' . $mode ] ) ? 1 : 0;
+            $current[ 'card_shadow_enabled_' . $mode ] = ! empty( $_POST[ 'card_shadow_enabled_' . $mode ] ) ? 1 : 0;
+
+            foreach ( [ 'card_border_width_', 'card_radius_' ] as $prefix ) {
+                $key = $prefix . $mode;
+                if ( isset( $_POST[ $key ] ) ) {
+                    $current[ $key ] = max( 0, absint( wp_unslash( $_POST[ $key ] ) ) );
+                }
+            }
+
+            $color_key = 'card_border_color_' . $mode;
+            if ( isset( $_POST[ $color_key ] ) ) {
+                $val = sanitize_hex_color( wp_unslash( $_POST[ $color_key ] ) );
+                if ( $val ) {
+                    $current[ $color_key ] = $val;
+                }
             }
         }
 

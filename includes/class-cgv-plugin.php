@@ -101,6 +101,20 @@ class CGV_Plugin {
             'enable_pulse'      => 1,
             'card_max_width_single'  => 480,
             'card_max_width_general' => 680,
+
+            // Borda e sombra — single
+            'card_border_enabled_single' => 1,
+            'card_border_width_single'   => 1,
+            'card_border_color_single'   => '#c6c6cd',
+            'card_radius_single'         => 12,
+            'card_shadow_enabled_single' => 1,
+
+            // Borda e sombra — geral
+            'card_border_enabled_general' => 1,
+            'card_border_width_general'   => 1,
+            'card_border_color_general'   => '#c6c6cd',
+            'card_radius_general'         => 12,
+            'card_shadow_enabled_general' => 1,
         ];
     }
 

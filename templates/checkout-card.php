@@ -62,16 +62,29 @@ $cart_subtotal = $cart ? wc_price( $cart->get_subtotal() ) : '';
 $has_items = $cart && $cart->get_cart_contents_count() > 0;
 $applied_coupons = $cart ? $cart->get_applied_coupons() : [];
 
-$max_width_key = $is_general_checkout ? 'card_max_width_general' : 'card_max_width_single';
-$max_width_val = isset( $settings[ $max_width_key ] ) ? (int) $settings[ $max_width_key ] : 0;
+$mode_suffix  = $is_general_checkout ? 'general' : 'single';
+$max_width_val = isset( $settings[ 'card_max_width_' . $mode_suffix ] ) ? (int) $settings[ 'card_max_width_' . $mode_suffix ] : 0;
 $max_width_css = $max_width_val > 0 ? $max_width_val . 'px' : 'none';
 
+$border_enabled = ! empty( $settings[ 'card_border_enabled_' . $mode_suffix ] );
+$border_width   = max( 0, (int) ( $settings[ 'card_border_width_' . $mode_suffix ] ?? 1 ) );
+$border_color   = $settings[ 'card_border_color_' . $mode_suffix ] ?? '#c6c6cd';
+$radius_val     = max( 0, (int) ( $settings[ 'card_radius_' . $mode_suffix ] ?? 12 ) );
+$shadow_enabled = ! empty( $settings[ 'card_shadow_enabled_' . $mode_suffix ] );
+
+$border_width_css = ( $border_enabled && $border_width > 0 ) ? $border_width . 'px' : '0';
+$shadow_css       = $shadow_enabled ? '0 4px 15px rgba(19, 27, 46, 0.06)' : 'none';
+
 $root_style = sprintf(
-    '--cgv-primary:%s;--cgv-accent:%s;--cgv-card-bg:%s;--cgv-max-width:%s;',
+    '--cgv-primary:%s;--cgv-accent:%s;--cgv-card-bg:%s;--cgv-max-width:%s;--cgv-border-width:%s;--cgv-border:%s;--cgv-radius:%spx;--cgv-shadow:%s;',
     esc_attr( $settings['primary_color'] ),
     esc_attr( $settings['accent_color'] ),
     esc_attr( $settings['card_bg_color'] ),
-    esc_attr( $max_width_css )
+    esc_attr( $max_width_css ),
+    esc_attr( $border_width_css ),
+    esc_attr( $border_color ),
+    esc_attr( $radius_val ),
+    esc_attr( $shadow_css )
 );
 $root_classes = 'cgv-card';
 if ( ! empty( $settings['enable_pulse'] ) ) {
