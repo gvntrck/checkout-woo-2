@@ -381,6 +381,21 @@ class CGV_Admin {
                         <p class="description"><?php esc_html_e( 'Insira a URL de um logo personalizado para exibir no topo do resumo esquerdo. Deixe em branco para usar o logo padrão do WordPress ou o nome do site.', 'checkout-gvntrck' ); ?></p>
                     </td>
                 </tr>
+                <tr>
+                    <th><label for="checkout_logo_width"><?php esc_html_e( 'Largura do Logo (px)', 'checkout-gvntrck' ); ?></label></th>
+                    <td>
+                        <input type="number" id="checkout_logo_width" name="checkout_logo_width" class="small-text" min="0" value="<?php echo esc_attr( $s['checkout_logo_width'] ); ?>" />
+                        <p class="description"><?php esc_html_e( 'Deixe em branco para definir como automático.', 'checkout-gvntrck' ); ?></p>
+                    </td>
+                </tr>
+                <tr>
+                    <th><label for="checkout_logo_height"><?php esc_html_e( 'Altura do Logo (px)', 'checkout-gvntrck' ); ?></label></th>
+                    <td>
+                        <input type="number" id="checkout_logo_height" name="checkout_logo_height" class="small-text" min="0" value="<?php echo esc_attr( $s['checkout_logo_height'] ); ?>" />
+                        <p class="description"><?php esc_html_e( 'Deixe em branco para definir como automático (padrão: 48px se nenhum tamanho for especificado).', 'checkout-gvntrck' ); ?></p>
+                        <p class="description"><strong><?php esc_html_e( 'Dica: Preencha apenas um dos campos (largura ou altura) para redimensionar o logo mantendo sua proporção original.', 'checkout-gvntrck' ); ?></strong></p>
+                    </td>
+                </tr>
             </table>
 
             <h2><?php esc_html_e( 'Cores', 'checkout-gvntrck' ); ?></h2>
@@ -599,6 +614,12 @@ class CGV_Admin {
         $current['enable_pulse'] = ! empty( $_POST['enable_pulse'] ) ? 1 : 0;
         $current['split_layout'] = ! empty( $_POST['split_layout'] ) ? 1 : 0;
         $current['checkout_logo'] = isset( $_POST['checkout_logo'] ) ? esc_url_raw( wp_unslash( $_POST['checkout_logo'] ) ) : '';
+        foreach ( [ 'checkout_logo_width', 'checkout_logo_height' ] as $logo_dim ) {
+            if ( isset( $_POST[ $logo_dim ] ) ) {
+                $val = sanitize_text_field( wp_unslash( $_POST[ $logo_dim ] ) );
+                $current[ $logo_dim ] = $val !== '' ? max( 0, absint( $val ) ) : '';
+            }
+        }
 
         foreach ( [ 'card_max_width_single', 'card_max_width_general' ] as $w ) {
             if ( isset( $_POST[ $w ] ) ) {

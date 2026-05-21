@@ -77,8 +77,12 @@ $shadow_enabled = ! empty( $settings[ 'card_shadow_enabled_' . $mode_suffix ] );
 $border_width_css = ( $border_enabled && $border_width > 0 ) ? $border_width . 'px' : '0';
 $shadow_css       = $shadow_enabled ? '0 4px 15px rgba(19, 27, 46, 0.06)' : 'none';
 
+$logo_width = ! empty( $settings['checkout_logo_width'] ) ? $settings['checkout_logo_width'] . 'px' : 'auto';
+$logo_height = ! empty( $settings['checkout_logo_height'] ) ? $settings['checkout_logo_height'] . 'px' : 'auto';
+$logo_max_height = ( ! empty( $settings['checkout_logo_width'] ) || ! empty( $settings['checkout_logo_height'] ) ) ? 'none' : '48px';
+
 $root_style = sprintf(
-    '--cgv-primary:%s;--cgv-accent:%s;--cgv-card-bg:%s;--cgv-max-width:%s;--cgv-border-width:%s;--cgv-border:%s;--cgv-radius:%spx;--cgv-shadow:%s;',
+    '--cgv-primary:%s;--cgv-accent:%s;--cgv-card-bg:%s;--cgv-max-width:%s;--cgv-border-width:%s;--cgv-border:%s;--cgv-radius:%spx;--cgv-shadow:%s;--cgv-logo-width:%s;--cgv-logo-height:%s;--cgv-logo-max-height:%s;',
     esc_attr( $settings['primary_color'] ),
     esc_attr( $settings['accent_color'] ),
     esc_attr( $settings['card_bg_color'] ),
@@ -86,7 +90,10 @@ $root_style = sprintf(
     esc_attr( $border_width_css ),
     esc_attr( $border_color ),
     esc_attr( $radius_val ),
-    esc_attr( $shadow_css )
+    esc_attr( $shadow_css ),
+    esc_attr( $logo_width ),
+    esc_attr( $logo_height ),
+    esc_attr( $logo_max_height )
 );
 $root_classes = 'cgv-card';
 if ( ! empty( $settings['enable_pulse'] ) ) {

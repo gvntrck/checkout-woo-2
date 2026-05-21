@@ -119,6 +119,8 @@ class CGV_Plugin {
             // Layout Split (Duas Colunas)
             'split_layout'                => 0,
             'checkout_logo'               => '',
+            'checkout_logo_width'         => '',
+            'checkout_logo_height'        => '',
         ];
     }
 
