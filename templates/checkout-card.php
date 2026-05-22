@@ -103,6 +103,19 @@ $root_classes .= $is_general_checkout ? ' cgv-card-general' : ' cgv-card-single'
 if ( $split_layout ) {
     $root_classes .= ' cgv-layout-split';
 }
+
+$has_person_type_field = false;
+$person_type_default = '1';
+foreach ( $fields as $field ) {
+    if ( is_array( $field ) && ! empty( $field['enabled'] ) && 'persontype' === ( $field['id'] ?? '' ) ) {
+        $has_person_type_field = true;
+        $person_type_options = CGV_Fields::sanitize_options( $field['options'] ?? [] );
+        if ( ! empty( $person_type_options ) ) {
+            $person_type_default = (string) key( $person_type_options );
+        }
+        break;
+    }
+}
 ?>
 <div class="<?php echo esc_attr( $root_classes ); ?>" data-cgv-mode="<?php echo esc_attr( $checkout_mode ); ?>" style="<?php echo $root_style; // phpcs:ignore WordPress.Security.EscapeOutput ?>">
     <?php if ( ! $has_items ) : ?>
@@ -212,21 +225,40 @@ if ( $split_layout ) {
                     if ( empty( $f['enabled'] ) ) {
                         continue;
                     }
-                    $name = ( 'full_name' === $f['id'] ) ? 'cgv_full_name' : $f['billing_key'];
+                    $field_id = sanitize_key( $f['id'] ?? '' );
+                    $name = ( 'full_name' === $field_id ) ? 'cgv_full_name' : $f['billing_key'];
                     $span = ( ( $f['span'] ?? 'full' ) === 'half' ) ? 'half' : 'full';
                     $numeric_input_ids = [ 'cpf', 'cnpj', 'birthdate', 'cellphone' ];
+                    $conditional_person_type = '';
+                    if ( $has_person_type_field && 'cpf' === $field_id ) {
+                        $conditional_person_type = '1';
+                    } elseif ( $has_person_type_field && 'cnpj' === $field_id ) {
+                        $conditional_person_type = '2';
+                    }
+                    $is_conditionally_hidden = '' !== $conditional_person_type && $conditional_person_type !== $person_type_default;
+                    $field_classes = 'cgv-field cgv-field-' . $span;
+                    if ( $is_conditionally_hidden ) {
+                        $field_classes .= ' cgv-field-hidden';
+                    }
+                    $is_required = ! empty( $f['required'] ) && ! $is_conditionally_hidden;
                     ?>
-                    <div class="cgv-field cgv-field-<?php echo esc_attr( $span ); ?>">
-                        <label class="cgv-label" for="cgv-field-<?php echo esc_attr( $f['id'] ); ?>">
+                    <div
+                        class="<?php echo esc_attr( $field_classes ); ?>"
+                        <?php if ( '' !== $conditional_person_type ) : ?>data-cgv-person-type="<?php echo esc_attr( $conditional_person_type ); ?>"<?php endif; ?>
+                        <?php if ( $is_conditionally_hidden ) : ?>hidden aria-hidden="true"<?php endif; ?>
+                    >
+                        <label class="cgv-label" for="cgv-field-<?php echo esc_attr( $field_id ); ?>">
                             <?php echo esc_html( $f['label'] ); ?>
                             <?php if ( ! empty( $f['required'] ) ) : ?><span class="cgv-req" aria-hidden="true">*</span><?php endif; ?>
                         </label>
                         <?php if ( 'select' === ( $f['type'] ?? '' ) ) : ?>
                             <select
-                                id="cgv-field-<?php echo esc_attr( $f['id'] ); ?>"
+                                id="cgv-field-<?php echo esc_attr( $field_id ); ?>"
                                 class="cgv-input"
                                 name="<?php echo esc_attr( $name ); ?>"
-                                <?php if ( ! empty( $f['required'] ) ) : ?>required<?php endif; ?>
+                                data-cgv-required="<?php echo ! empty( $f['required'] ) ? '1' : '0'; ?>"
+                                <?php if ( $is_required ) : ?>required<?php endif; ?>
+                                <?php if ( $is_conditionally_hidden ) : ?>disabled<?php endif; ?>
                             >
                                 <?php foreach ( CGV_Fields::sanitize_options( $f['options'] ?? [] ) as $value => $label ) : ?>
                                     <option value="<?php echo esc_attr( $value ); ?>"><?php echo esc_html( $label ); ?></option>
@@ -234,14 +266,16 @@ if ( $split_layout ) {
                             </select>
                         <?php else : ?>
                             <input
-                                id="cgv-field-<?php echo esc_attr( $f['id'] ); ?>"
+                                id="cgv-field-<?php echo esc_attr( $field_id ); ?>"
                                 class="cgv-input"
                                 type="<?php echo esc_attr( $f['type'] ); ?>"
                                 name="<?php echo esc_attr( $name ); ?>"
                                 placeholder="<?php echo esc_attr( $f['placeholder'] ?? '' ); ?>"
-                                <?php if ( in_array( $f['id'], $numeric_input_ids, true ) ) : ?>inputmode="numeric"<?php endif; ?>
+                                data-cgv-required="<?php echo ! empty( $f['required'] ) ? '1' : '0'; ?>"
+                                <?php if ( in_array( $field_id, $numeric_input_ids, true ) ) : ?>inputmode="numeric"<?php endif; ?>
                                 <?php if ( ! empty( $f['autocomplete'] ) ) : ?>autocomplete="<?php echo esc_attr( $f['autocomplete'] ); ?>"<?php endif; ?>
-                                <?php if ( ! empty( $f['required'] ) ) : ?>required<?php endif; ?>
+                                <?php if ( $is_required ) : ?>required<?php endif; ?>
+                                <?php if ( $is_conditionally_hidden ) : ?>disabled<?php endif; ?>
                             />
                         <?php endif; ?>
                     </div>

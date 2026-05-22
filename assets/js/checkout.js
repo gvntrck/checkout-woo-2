@@ -57,7 +57,34 @@
             sync();
         }
 
-        // 3. Masks for the Brazilian billing fields --------------------------
+        // 3. CPF/CNPJ visibility by person type -----------------------------
+        var $personType = $form.find('select[name="billing_persontype"], #cgv-field-persontype').first();
+        var syncPersonDocumentFields = function () {
+            if (!$personType.length) {
+                return;
+            }
+
+            var selectedType = String($personType.val() || '');
+            $form.find('[data-cgv-person-type]').each(function () {
+                var $field = $(this);
+                var shouldShow = String($field.data('cgvPersonType')) === selectedType;
+
+                $field.toggleClass('cgv-field-hidden', !shouldShow);
+                $field.prop('hidden', !shouldShow);
+                $field.attr('aria-hidden', shouldShow ? 'false' : 'true');
+
+                $field.find('input, select, textarea').each(function () {
+                    var $control = $(this);
+                    var isRequired = Number($control.data('cgvRequired')) === 1;
+                    $control.prop('disabled', !shouldShow);
+                    $control.prop('required', shouldShow && isRequired);
+                });
+            });
+        };
+        $personType.on('change', syncPersonDocumentFields);
+        syncPersonDocumentFields();
+
+        // 4. Masks for the Brazilian billing fields --------------------------
         var onlyDigits = function (value) {
             return (value || '').replace(/\D/g, '');
         };
@@ -98,7 +125,7 @@
             });
         });
 
-        // 4. General checkout cart controls ---------------------------------
+        // 5. General checkout cart controls ---------------------------------
         var updateCart = function (payload) {
             if (!CGV || !CGV.ajax_url || !CGV.cart_nonce) {
                 return;
@@ -179,7 +206,7 @@
             }
         });
 
-        // 5. After WC AJAX fragment refresh, restore visual tab selection ----
+        // 6. After WC AJAX fragment refresh, restore visual tab selection ----
         $(document.body).on('updated_checkout', function () {
             var $active = $card.find('.cgv-tab.is-active');
             if ($active.length) {
@@ -231,7 +258,7 @@
             }
         });
 
-        // 6. Override final thank-you redirect, if configured -----------------
+        // 7. Override final thank-you redirect, if configured -----------------
         if (CGV && CGV.thank_you_url) {
             $(document.body).on('checkout_place_order', function () { return true; });
             // wc-checkout.js follows result.redirect verbatim. We hijack the

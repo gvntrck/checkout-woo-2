@@ -134,7 +134,7 @@ class CGV_Checkout {
         }
 
         foreach ( CGV_Fields::get_fields() as $field ) {
-            if ( empty( $field['enabled'] ) || empty( $field['required'] ) || 'full_name' === ( $field['id'] ?? '' ) ) {
+            if ( empty( $field['enabled'] ) || ! self::field_applies_to_person_type( $field ) || empty( $field['required'] ) || 'full_name' === ( $field['id'] ?? '' ) ) {
                 continue;
             }
             $billing_key = sanitize_key( $field['billing_key'] ?? '' );
@@ -161,7 +161,7 @@ class CGV_Checkout {
         }
 
         foreach ( CGV_Fields::get_fields() as $field ) {
-            if ( empty( $field['enabled'] ) || 'full_name' === ( $field['id'] ?? '' ) ) {
+            if ( empty( $field['enabled'] ) || ! self::field_applies_to_person_type( $field ) || 'full_name' === ( $field['id'] ?? '' ) ) {
                 continue;
             }
 
@@ -182,6 +182,34 @@ class CGV_Checkout {
                 update_user_meta( $user_id, $billing_key, $value );
             }
         }
+    }
+
+    /**
+     * Check CPF/CNPJ fields against the selected person type.
+     */
+    protected static function field_applies_to_person_type( $field ) {
+        $field_id = sanitize_key( $field['id'] ?? '' );
+        if ( ! in_array( $field_id, [ 'cpf', 'cnpj' ], true ) ) {
+            return true;
+        }
+
+        $person_type = self::get_posted_person_type();
+        if ( '' === $person_type ) {
+            return true;
+        }
+
+        return ( 'cpf' === $field_id && '1' === $person_type ) || ( 'cnpj' === $field_id && '2' === $person_type );
+    }
+
+    /**
+     * Get the posted Brazilian person type value.
+     */
+    protected static function get_posted_person_type() {
+        if ( empty( $_POST['billing_persontype'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+            return '';
+        }
+
+        return sanitize_text_field( wp_unslash( $_POST['billing_persontype'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
     }
 
     /**
