@@ -48,3 +48,30 @@
     border-top: 0;
     padding-top: 0;
 }
+
+/* Estilos para arrastar abas de pagamento */
+.cgv-payment-tabs-table {
+    border-collapse: collapse;
+    width: 100%;
+}
+.cgv-payment-tab-row {
+    border-bottom: 1px solid #dcdcde;
+    transition: background-color 0.2s ease;
+}
+.cgv-payment-tab-row[draggable="true"] {
+    opacity: 0.6;
+    background: #f0f0f1;
+    border: 1px dashed #2271b1;
+}
+.cgv-payment-tab-row .cgv-tab-handle {
+    cursor: move;
+    font-size: 20px;
+    color: #8c8f94;
+    user-select: none;
+    padding: 8px;
+    display: inline-block;
+    transition: color 0.2s ease;
+}
+.cgv-payment-tab-row .cgv-tab-handle:hover {
+    color: #2271b1;
+}

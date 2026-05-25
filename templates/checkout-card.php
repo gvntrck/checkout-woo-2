@@ -22,6 +22,9 @@ $main_product = isset( $main_product ) ? $main_product : null;
 
 $available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
 
+$order_str = ! empty( $settings['payment_methods_order'] ) ? $settings['payment_methods_order'] : 'card,pix,boleto';
+$order     = explode( ',', $order_str );
+
 // Build tabs (only ones whose mapped gateway is currently available).
 $raw_tabs = [
     'card'   => [
@@ -41,8 +44,22 @@ $raw_tabs = [
     ],
 ];
 
+// Reordenar $raw_tabs de acordo com a ordem salva
+$ordered_raw_tabs = [];
+foreach ( $order as $key ) {
+    if ( isset( $raw_tabs[ $key ] ) ) {
+        $ordered_raw_tabs[ $key ] = $raw_tabs[ $key ];
+    }
+}
+// Caso falte algum dos métodos padrões
+foreach ( $raw_tabs as $key => $val ) {
+    if ( ! isset( $ordered_raw_tabs[ $key ] ) ) {
+        $ordered_raw_tabs[ $key ] = $val;
+    }
+}
+
 $tabs = [];
-foreach ( $raw_tabs as $key => $t ) {
+foreach ( $ordered_raw_tabs as $key => $t ) {
     if ( $t['enabled'] && ! empty( $t['gateway'] ) && isset( $available_gateways[ $t['gateway'] ] ) ) {
         $tabs[ $key ] = $t;
     }
@@ -308,9 +325,17 @@ foreach ( $fields as $field ) {
             <!-- Standard WooCommerce payment block (visually re-styled, controls the real payment_method radios). -->
             <div id="payment" class="cgv-payment">
                 <?php
-                $methods_to_render = ! empty( $tabs )
-                    ? array_intersect_key( $available_gateways, array_flip( wp_list_pluck( $tabs, 'gateway' ) ) )
-                    : $fallback_gateways;
+                $methods_to_render = [];
+                if ( ! empty( $tabs ) ) {
+                    foreach ( $tabs as $tab_info ) {
+                        $gw_id = $tab_info['gateway'];
+                        if ( isset( $available_gateways[ $gw_id ] ) ) {
+                            $methods_to_render[ $gw_id ] = $available_gateways[ $gw_id ];
+                        }
+                    }
+                } else {
+                    $methods_to_render = $fallback_gateways;
+                }
                 if ( ! empty( $methods_to_render ) ) :
                     ?>
                     <ul class="wc_payment_methods payment_methods methods">

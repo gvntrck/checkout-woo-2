@@ -175,40 +175,64 @@ class CGV_Admin {
             </table>
 
             <h2><?php esc_html_e( 'Abas de Pagamento', 'checkout-gvntrck' ); ?></h2>
-            <p class="description"><?php esc_html_e( 'Mapeie cada aba do checkout (Cartão / PIX / Boleto) para um gateway de pagamento ativo do WooCommerce. Abas sem gateway válido são ocultadas automaticamente.', 'checkout-gvntrck' ); ?></p>
-            <table class="form-table">
-                <?php
-                foreach ( [ 'card' => 'Cartão', 'pix' => 'PIX', 'boleto' => 'Boleto' ] as $key => $default_label ) :
-                    $enabled_key = 'tab_' . $key . '_enabled';
-                    $label_key   = 'tab_' . $key . '_label';
-                    $gw_key      = 'gateway_' . $key;
-                    ?>
-                    <tr>
-                        <th><?php echo esc_html( $default_label ); ?></th>
-                        <td>
-                            <label>
-                                <input type="checkbox" name="<?php echo esc_attr( $enabled_key ); ?>" value="1" <?php checked( ! empty( $s[ $enabled_key ] ) ); ?> />
-                                <?php esc_html_e( 'Exibir esta aba', 'checkout-gvntrck' ); ?>
-                            </label>
-                            <br /><br />
-                            <label>
-                                <?php esc_html_e( 'Rótulo:', 'checkout-gvntrck' ); ?>
-                                <input type="text" name="<?php echo esc_attr( $label_key ); ?>" value="<?php echo esc_attr( $s[ $label_key ] ); ?>" />
-                            </label>
-                            &nbsp;&nbsp;
-                            <label>
-                                <?php esc_html_e( 'Gateway:', 'checkout-gvntrck' ); ?>
-                                <select name="<?php echo esc_attr( $gw_key ); ?>">
-                                    <?php foreach ( $gateway_options as $gw_id => $gw_label ) : ?>
-                                        <option value="<?php echo esc_attr( $gw_id ); ?>" <?php selected( $s[ $gw_key ], $gw_id ); ?>>
-                                            <?php echo esc_html( $gw_label ); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </label>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
+            <p class="description"><?php esc_html_e( 'Mapeie cada aba do checkout (Cartão / PIX / Boleto) para um gateway de pagamento ativo do WooCommerce. Abas sem gateway válido são ocultadas automaticamente. Arraste as linhas para reordenar a exibição no checkout.', 'checkout-gvntrck' ); ?></p>
+            
+            <?php
+            $order_str = ! empty( $s['payment_methods_order'] ) ? $s['payment_methods_order'] : 'card,pix,boleto';
+            $order     = explode( ',', $order_str );
+            $tabs_map  = [ 'card' => 'Cartão', 'pix' => 'PIX', 'boleto' => 'Boleto' ];
+
+            // Garante que todas as abas estejam na ordem (caso alguma fique de fora)
+            foreach ( $tabs_map as $k => $label ) {
+                if ( ! in_array( $k, $order, true ) ) {
+                    $order[] = $k;
+                }
+            }
+            ?>
+            <input type="hidden" name="payment_methods_order" id="cgv_payment_methods_order" value="<?php echo esc_attr( $order_str ); ?>" />
+            
+            <table class="form-table cgv-payment-tabs-table">
+                <tbody id="cgv-payment-tabs-rows">
+                    <?php
+                    foreach ( $order as $key ) :
+                        if ( ! isset( $tabs_map[ $key ] ) ) {
+                            continue;
+                        }
+                        $default_label = $tabs_map[ $key ];
+                        $enabled_key   = 'tab_' . $key . '_enabled';
+                        $label_key     = 'tab_' . $key . '_label';
+                        $gw_key        = 'gateway_' . $key;
+                        ?>
+                        <tr class="cgv-payment-tab-row" data-tab-key="<?php echo esc_attr( $key ); ?>">
+                            <th style="display: flex; align-items: center; min-height: 40px; padding: 20px 10px 20px 0;">
+                                <span class="cgv-tab-handle" style="cursor: move; margin-right: 10px; font-size: 20px; color: #8c8f94; user-select: none;">≡</span>
+                                <strong><?php echo esc_html( $default_label ); ?></strong>
+                            </th>
+                            <td>
+                                <label>
+                                    <input type="checkbox" name="<?php echo esc_attr( $enabled_key ); ?>" value="1" <?php checked( ! empty( $s[ $enabled_key ] ) ); ?> />
+                                    <?php esc_html_e( 'Exibir esta aba', 'checkout-gvntrck' ); ?>
+                                </label>
+                                <br /><br />
+                                <label>
+                                    <?php esc_html_e( 'Rótulo:', 'checkout-gvntrck' ); ?>
+                                    <input type="text" name="<?php echo esc_attr( $label_key ); ?>" value="<?php echo esc_attr( $s[ $label_key ] ); ?>" />
+                                </label>
+                                &nbsp;&nbsp;
+                                <label>
+                                    <?php esc_html_e( 'Gateway:', 'checkout-gvntrck' ); ?>
+                                    <select name="<?php echo esc_attr( $gw_key ); ?>">
+                                        <?php foreach ( $gateway_options as $gw_id => $gw_label ) : ?>
+                                            <option value="<?php echo esc_attr( $gw_id ); ?>" <?php selected( $s[ $gw_key ], $gw_id ); ?>>
+                                                <?php echo esc_html( $gw_label ); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </label>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
             </table>
 
             <?php submit_button( __( 'Salvar configurações', 'checkout-gvntrck' ) ); ?>
@@ -234,6 +258,8 @@ class CGV_Admin {
             $current[ 'tab_' . $k . '_label' ]   = isset( $_POST[ 'tab_' . $k . '_label' ] ) ? sanitize_text_field( wp_unslash( $_POST[ 'tab_' . $k . '_label' ] ) ) : '';
             $current[ 'gateway_' . $k ]          = isset( $_POST[ 'gateway_' . $k ] ) ? sanitize_key( wp_unslash( $_POST[ 'gateway_' . $k ] ) ) : '';
         }
+
+        $current['payment_methods_order'] = isset( $_POST['payment_methods_order'] ) ? sanitize_text_field( wp_unslash( $_POST['payment_methods_order'] ) ) : 'card,pix,boleto';
 
         update_option( 'cgv_settings', $current );
 

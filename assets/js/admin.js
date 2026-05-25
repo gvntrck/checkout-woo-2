@@ -50,5 +50,45 @@
             }
             dragRow = null;
         });
+
+        // Drag-sort rows for payment tabs
+        var dragTabRow = null;
+        $(document).on('mousedown', '.cgv-tab-handle', function () {
+            dragTabRow = $(this).closest('tr').get(0);
+            if (dragTabRow) {
+                dragTabRow.setAttribute('draggable', 'true');
+            }
+        });
+        $(document).on('dragstart', '.cgv-payment-tab-row', function (e) {
+            dragTabRow = this;
+            try { e.originalEvent.dataTransfer.effectAllowed = 'move'; } catch (err) {}
+        });
+        $(document).on('dragover', '.cgv-payment-tab-row', function (e) {
+            e.preventDefault();
+            if (!dragTabRow || dragTabRow === this) { return; }
+            var rect = this.getBoundingClientRect();
+            var after = (e.originalEvent.clientY - rect.top) > rect.height / 2;
+            if (after) {
+                this.parentNode.insertBefore(dragTabRow, this.nextSibling);
+            } else {
+                this.parentNode.insertBefore(dragTabRow, this);
+            }
+        });
+        $(document).on('dragend', '.cgv-payment-tab-row', function () {
+            if (dragTabRow) {
+                dragTabRow.removeAttribute('draggable');
+            }
+            dragTabRow = null;
+
+            // Update order input
+            var order = [];
+            $('#cgv-payment-tabs-rows .cgv-payment-tab-row').each(function () {
+                var key = $(this).data('tab-key');
+                if (key) {
+                    order.push(key);
+                }
+            });
+            $('#cgv_payment_methods_order').val(order.join(','));
+        });
     });
 })(jQuery);
