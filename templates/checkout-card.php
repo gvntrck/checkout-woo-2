@@ -205,7 +205,7 @@ foreach ( $fields as $field ) {
                             </div>
                         <?php endif; ?>
 
-                        <div class="cgv-left-summary-row cgv-left-total-row">
+                        <div class="cgv-summary-row cgv-left-total-row order-total">
                             <span class="cgv-left-summary-label"><?php echo esc_html( $settings['total_label'] ); ?></span>
                             <span class="cgv-left-summary-value cgv-left-cart-total"><?php echo wp_kses_post( $cart_total ); ?></span>
                         </div>
@@ -452,7 +452,7 @@ foreach ( $fields as $field ) {
                             <span>-<?php echo wp_kses_post( wc_price( $cart->get_discount_total() ) ); ?></span>
                         </div>
                     <?php endif; ?>
-                    <div class="cgv-summary-row cgv-summary-total">
+                    <div class="cgv-summary-row cgv-summary-total order-total">
                         <span><?php echo esc_html( $settings['total_label'] ); ?></span>
                         <strong><?php echo wp_kses_post( $cart_total ); ?></strong>
                     </div>

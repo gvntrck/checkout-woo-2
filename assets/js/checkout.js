@@ -2,40 +2,6 @@
 (function ($) {
     'use strict';
 
-    // Patches de compatibilidade para evitar que scripts de gateways (como PagSeguro)
-    // quebrem com erro "Cannot read properties of undefined (reading 'replace')"
-    // ao tentar ler valores ou atributos de elementos inexistentes no DOM.
-    var originalVal = $.fn.val;
-    $.fn.val = function () {
-        if (arguments.length === 0) {
-            var result = originalVal.apply(this, arguments);
-            return (result === undefined || result === null) ? '' : result;
-        }
-        return originalVal.apply(this, arguments);
-    };
-
-    var originalAttr = $.fn.attr;
-    $.fn.attr = function (name) {
-        var result = originalAttr.apply(this, arguments);
-        if (result === undefined || result === null) {
-            if (name === 'placeholder' || name === 'pattern' || name === 'maxlength') {
-                return '';
-            }
-        }
-        return result;
-    };
-
-    var originalData = $.fn.data;
-    $.fn.data = function (key) {
-        var result = originalData.apply(this, arguments);
-        if (arguments.length === 1 && (result === undefined || result === null)) {
-            if (key === 'mask' || key === 'placeholder') {
-                return '';
-            }
-        }
-        return result;
-    };
-
     $(function () {
         var $card = $('.cgv-card');
         if (!$card.length) {
