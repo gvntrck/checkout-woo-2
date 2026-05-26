@@ -332,6 +332,9 @@ foreach ( $fields as $field ) {
 
             <!-- Standard WooCommerce payment block (visually re-styled, controls the real payment_method radios). -->
             <div id="payment" class="cgv-payment">
+                <!-- Divs ocultas para compatibilidade de leitura do valor total pelo script do PagSeguro -->
+                <div class="order-total" style="display:none !important;"><bdi><?php echo esc_html( $cart ? $cart->get_total( 'edit' ) : '0' ); ?></bdi></div>
+                <div class="product-total" style="display:none !important;"><bdi><?php echo esc_html( $cart ? $cart->get_total( 'edit' ) : '0' ); ?></bdi></div>
                 <?php
                 $methods_to_render = [];
                 if ( ! empty( $tabs ) ) {
