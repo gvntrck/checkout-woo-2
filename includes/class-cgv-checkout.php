@@ -134,9 +134,28 @@ class CGV_Checkout {
         }
 
         foreach ( CGV_Fields::get_fields() as $field ) {
-            if ( empty( $field['enabled'] ) || ! self::field_applies_to_person_type( $field ) || empty( $field['required'] ) || 'full_name' === ( $field['id'] ?? '' ) ) {
+            if ( empty( $field['enabled'] ) || ! self::field_applies_to_person_type( $field ) || empty( $field['required'] ) ) {
                 continue;
             }
+
+            if ( 'full_name' === ( $field['id'] ?? '' ) ) {
+                $full_name = '';
+                if ( ! empty( $_POST['cgv_full_name'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+                    $full_name = sanitize_text_field( wp_unslash( $_POST['cgv_full_name'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
+                }
+                if ( empty( trim( $full_name ) ) ) {
+                    wc_add_notice(
+                        sprintf(
+                            /* translators: %s: field label */
+                            __( '%s é um campo obrigatório.', 'checkout-gvntrck' ),
+                            $field['label'] ?? __( 'Nome Completo', 'checkout-gvntrck' )
+                        ),
+                        'error'
+                    );
+                }
+                continue;
+            }
+
             $billing_key = sanitize_key( $field['billing_key'] ?? '' );
             if ( '' === $billing_key || ! empty( $_POST[ $billing_key ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
                 continue;

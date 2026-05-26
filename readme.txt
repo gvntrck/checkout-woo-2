@@ -3,7 +3,7 @@ Contributors: giovaniturek
 Tags: woocommerce, checkout, conversion, one-page, shortcode
 Requires at least: 5.8
 Tested up to: 6.6
-Stable tag: 1.1.6
+Stable tag: 1.1.7
 Requires PHP: 7.4
 WC requires at least: 6.0
 WC tested up to: 9.4
@@ -41,6 +41,9 @@ Checkout GVNTRCK substitui a tela de checkout padrão do WooCommerce por um card
 4. Insira o shortcode `[checkout-gvntrck]`, `[checkout-gvntrck product_id="123"]` ou `[checkout-gvntrck-geral]` na página desejada.
 
 == Changelog ==
+
+= 1.1.7 =
+* Corrige a validação do campo de Nome Completo (`full_name`) no servidor, adicionando verificação de obrigatoriedade no backend para impedir transações sem o preenchimento do nome do comprador.
 
 = 1.1.6 =
 * Define a variável global do PagSeguro `pagseguro_connect_change_card_page` no escopo do front-end (`window`) caso ela esteja ausente na página, prevenindo erros do tipo `Uncaught ReferenceError: pagseguro_connect_change_card_page is not defined` no console ao digitar o número do cartão.
