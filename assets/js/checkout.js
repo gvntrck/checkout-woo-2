@@ -2,6 +2,11 @@
 (function ($) {
     'use strict';
 
+    // Define variáveis globais ausentes para evitar ReferenceError em scripts de gateways
+    if (typeof window.pagseguro_connect_change_card_page === 'undefined') {
+        window.pagseguro_connect_change_card_page = false;
+    }
+
     // Patches de compatibilidade para evitar que scripts de gateways (como PagSeguro)
     // quebrem com erro "Cannot read properties of undefined (reading 'replace')"
     // ao tentar ler elementos ou atributos inexistentes no DOM.
