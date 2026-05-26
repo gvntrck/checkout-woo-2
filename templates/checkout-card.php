@@ -238,12 +238,20 @@ foreach ( $fields as $field ) {
             </header>
 
             <div class="cgv-fields-grid">
-                <?php foreach ( $fields as $f ) :
+                <?php
+                $rendered_billing_keys = [];
+                foreach ( $fields as $f ) :
                     if ( empty( $f['enabled'] ) ) {
                         continue;
                     }
                     $field_id = sanitize_key( $f['id'] ?? '' );
                     $name = ( 'full_name' === $field_id ) ? 'cgv_full_name' : $f['billing_key'];
+                    if ( 'full_name' === $field_id ) {
+                        $rendered_billing_keys[] = 'billing_first_name';
+                        $rendered_billing_keys[] = 'billing_last_name';
+                    } else {
+                        $rendered_billing_keys[] = $name;
+                    }
                     $span = ( ( $f['span'] ?? 'full' ) === 'half' ) ? 'half' : 'full';
                     $numeric_input_ids = [ 'cpf', 'cnpj', 'birthdate', 'cellphone' ];
                     $conditional_person_type = '';
@@ -486,6 +494,34 @@ foreach ( $fields as $field ) {
                 </div>
             <?php endfor; ?>
         </div>
+        <?php
+        // Injetar inputs hidden para os campos de faturamento que não estão presentes no formulário,
+        // evitando erros de undefined em scripts de gateways (como PagSeguro).
+        $all_billing_defaults = [
+            'billing_first_name'   => 'Cliente',
+            'billing_last_name'    => '.',
+            'billing_email'        => '',
+            'billing_phone'        => '00000000000',
+            'billing_cellphone'    => '00000000000',
+            'billing_cpf'          => '',
+            'billing_cnpj'         => '',
+            'billing_persontype'   => '1',
+            'billing_birthdate'    => '',
+            'billing_postcode'     => '00000-000',
+            'billing_address_1'    => 'N/A',
+            'billing_address_2'    => '',
+            'billing_number'       => '0',
+            'billing_neighborhood' => 'N/A',
+            'billing_city'         => 'N/A',
+            'billing_state'        => 'SP',
+            'billing_country'      => 'BR',
+        ];
+        foreach ( $all_billing_defaults as $key => $default_val ) {
+            if ( empty( $rendered_billing_keys ) || ! in_array( $key, $rendered_billing_keys, true ) ) {
+                echo '<input type="hidden" id="' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" value="' . esc_attr( $default_val ) . '" />';
+            }
+        }
+        ?>
     </form>
         <?php if ( $split_layout ) : ?>
                 </div><!-- .cgv-split-right -->
