@@ -3,7 +3,7 @@ Contributors: giovaniturek
 Tags: woocommerce, checkout, conversion, one-page, shortcode
 Requires at least: 5.8
 Tested up to: 6.6
-Stable tag: 1.1.2
+Stable tag: 1.1.3
 Requires PHP: 7.4
 WC requires at least: 6.0
 WC tested up to: 9.4
@@ -41,6 +41,9 @@ Checkout GVNTRCK substitui a tela de checkout padrão do WooCommerce por um card
 4. Insira o shortcode `[checkout-gvntrck]`, `[checkout-gvntrck product_id="123"]` ou `[checkout-gvntrck-geral]` na página desejada.
 
 == Changelog ==
+
+= 1.1.3 =
+* Adiciona patches de compatibilidade ao jQuery no front-end (`$.fn.val()`, `$.fn.attr()` e `$.fn.data()`) para que, caso algum gateway tente ler elementos do DOM que ainda não foram inicializados ou carregados, retorne uma string vazia ao invés de `undefined`, prevenindo erros de JavaScript fatais.
 
 = 1.1.2 =
 * Injeta inputs hidden para todos os campos padrão de faturamento do WooCommerce que não estiverem ativos no formulário. Isso evita erros fatais de JavaScript de 'undefined' (como '.replace()' no PagSeguro) em scripts de gateways que tentam ler elementos inexistentes no DOM.
