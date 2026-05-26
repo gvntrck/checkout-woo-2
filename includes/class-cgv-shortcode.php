@@ -17,6 +17,7 @@ class CGV_Shortcode {
         add_action( 'wp_enqueue_scripts', [ __CLASS__, 'register_assets' ] );
         add_action( 'wp_ajax_cgv_update_cart', [ __CLASS__, 'ajax_update_cart' ] );
         add_action( 'wp_ajax_nopriv_cgv_update_cart', [ __CLASS__, 'ajax_update_cart' ] );
+        add_filter( 'woocommerce_is_checkout', [ __CLASS__, 'force_is_checkout' ], 999 );
     }
 
     /**
@@ -215,6 +216,29 @@ class CGV_Shortcode {
             'count' => WC()->cart->get_cart_contents_count(),
             'total' => WC()->cart->get_total(),
         ] );
+    }
+
+    /**
+     * Force WooCommerce to recognize our custom shortcode page as a checkout page,
+     * so third-party payment gateway scripts (Stripe, Mercado Pago, etc.) are enqueued.
+     */
+    public static function force_is_checkout( $is_checkout ) {
+        if ( is_admin() ) {
+            return $is_checkout;
+        }
+
+        global $post;
+        if ( is_a( $post, 'WP_Post' ) ) {
+            if ( has_shortcode( $post->post_content, 'checkout-gvntrck' ) || has_shortcode( $post->post_content, 'checkout-gvntrck-geral' ) ) {
+                return true;
+            }
+            // Fallback para construtores visuais que salvam o conteúdo em metadados
+            if ( stripos( $post->post_content, 'checkout-gvntrck' ) !== false ) {
+                return true;
+            }
+        }
+
+        return $is_checkout;
     }
 
     /**

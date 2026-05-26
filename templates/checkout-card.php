@@ -264,13 +264,13 @@ foreach ( $fields as $field ) {
                         <?php if ( '' !== $conditional_person_type ) : ?>data-cgv-person-type="<?php echo esc_attr( $conditional_person_type ); ?>"<?php endif; ?>
                         <?php if ( $is_conditionally_hidden ) : ?>hidden aria-hidden="true"<?php endif; ?>
                     >
-                        <label class="cgv-label" for="cgv-field-<?php echo esc_attr( $field_id ); ?>">
+                        <label class="cgv-label" for="<?php echo esc_attr( $name ); ?>">
                             <?php echo esc_html( $f['label'] ); ?>
                             <?php if ( ! empty( $f['required'] ) ) : ?><span class="cgv-req" aria-hidden="true">*</span><?php endif; ?>
                         </label>
                         <?php if ( 'select' === ( $f['type'] ?? '' ) ) : ?>
                             <select
-                                id="cgv-field-<?php echo esc_attr( $field_id ); ?>"
+                                id="<?php echo esc_attr( $name ); ?>"
                                 class="cgv-input"
                                 name="<?php echo esc_attr( $name ); ?>"
                                 data-cgv-required="<?php echo ! empty( $f['required'] ) ? '1' : '0'; ?>"
@@ -283,7 +283,7 @@ foreach ( $fields as $field ) {
                             </select>
                         <?php else : ?>
                             <input
-                                id="cgv-field-<?php echo esc_attr( $field_id ); ?>"
+                                id="<?php echo esc_attr( $name ); ?>"
                                 class="cgv-input"
                                 type="<?php echo esc_attr( $f['type'] ); ?>"
                                 name="<?php echo esc_attr( $name ); ?>"
