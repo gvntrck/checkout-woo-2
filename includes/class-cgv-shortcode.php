@@ -85,6 +85,11 @@ class CGV_Shortcode {
             return '';
         }
 
+        // Se for a página de obrigado do WooCommerce, delega para a renderização do checkout nativo do WooCommerce (exibe QR Code Pix, boleto, etc)
+        if ( function_exists( 'is_wc_endpoint_url' ) && is_wc_endpoint_url( 'order-received' ) ) {
+            return do_shortcode( '[woocommerce_checkout]' );
+        }
+
         self::ensure_wc_cart();
 
         wp_enqueue_style( 'cgv-checkout' );

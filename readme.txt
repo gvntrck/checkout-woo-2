@@ -3,7 +3,7 @@ Contributors: giovaniturek
 Tags: woocommerce, checkout, conversion, one-page, shortcode
 Requires at least: 5.8
 Tested up to: 6.6
-Stable tag: 1.0.5
+Stable tag: 1.1.0
 Requires PHP: 7.4
 WC requires at least: 6.0
 WC tested up to: 9.4
@@ -41,6 +41,9 @@ Checkout GVNTRCK substitui a tela de checkout padrão do WooCommerce por um card
 4. Insira o shortcode `[checkout-gvntrck]`, `[checkout-gvntrck product_id="123"]` ou `[checkout-gvntrck-geral]` na página desejada.
 
 == Changelog ==
+
+= 1.1.0 =
+* Corrige o redirecionamento da página de obrigado (order-received), exibindo a página de agradecimento padrão do WooCommerce (com QR Code do Pix, etc) em vez de uma mensagem de carrinho vazio.
 
 = 1.0.5 =
 * Ajusta espaçamento dos avisos do WooCommerce e remove seletor nativo do campo de quantidade.

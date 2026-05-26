@@ -3,7 +3,7 @@
  * Plugin Name: Checkout GVNTRCK
  * Plugin URI:  https://projetoalfa.org
  * Description: Checkout personalizado de alta conversão para WooCommerce. Renderiza um card de checkout via shortcode [checkout-gvntrck], totalmente compatível com gateways de pagamento.
- * Version:     1.0.9
+ * Version:     1.1.0
  * Author:      Giovani Tureck
  * Author URI:  https://projetoalfa.org
  * Text Domain: checkout-gvntrck
@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('CGV_VERSION', '1.0.9');
+define('CGV_VERSION', '1.1.0');
 define('CGV_FILE', __FILE__);
 define('CGV_DIR', plugin_dir_path(__FILE__));
 define('CGV_URL', plugin_dir_url(__FILE__));
