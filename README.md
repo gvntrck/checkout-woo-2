@@ -1,5 +1,9 @@
 # Checkout GVNTRCK
 
+> **Status: arquivado e descontinuado**
+>
+> Este projeto não recebe novas funcionalidades, correções ou releases. O repositório é mantido somente como referência histórica temporária para análise e eventual migração. A implementação canônica do GVN Checkout for WooCommerce está no projeto `checkout-woo`; não use este projeto como base de novas instalações. Os arquivos e o histórico Git permanecem preservados.
+
 Checkout personalizado para WooCommerce que renderiza um card de checkout em qualquer pagina por shortcode. O plugin usa o fluxo nativo do WooCommerce, mantendo compatibilidade com gateways de pagamento ativos.
 
 ![Print do Checkout GVNTRCK](print.png)

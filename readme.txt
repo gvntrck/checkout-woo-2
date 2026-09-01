@@ -3,13 +3,17 @@ Contributors: giovaniturek
 Tags: woocommerce, checkout, conversion, one-page, shortcode
 Requires at least: 5.8
 Tested up to: 6.6
-Stable tag: 1.1.7
+Stable tag: 1.1.8
 Requires PHP: 7.4
 WC requires at least: 6.0
 WC tested up to: 9.4
 License: GPLv2 or later
 
 Checkout personalizado de alta conversão para WooCommerce. Renderiza um card de checkout via shortcode [checkout-gvntrck] ou [checkout-gvntrck-geral], totalmente compatível com gateways de pagamento.
+
+== Status ==
+
+Este plugin está arquivado e descontinuado. Não recebe novas funcionalidades, correções ou releases. É mantido somente como referência histórica temporária para análise e eventual migração. A implementação canônica do GVN Checkout for WooCommerce está no projeto `checkout-woo`; não use este plugin como base de novas instalações. Os arquivos e o histórico Git permanecem preservados.
 
 == Description ==
 
@@ -41,6 +45,9 @@ Checkout GVNTRCK substitui a tela de checkout padrão do WooCommerce por um card
 4. Insira o shortcode `[checkout-gvntrck]`, `[checkout-gvntrck product_id="123"]` ou `[checkout-gvntrck-geral]` na página desejada.
 
 == Changelog ==
+
+= 1.1.8 =
+* Marca o projeto como arquivado e descontinuado, mantendo os arquivos e o histórico Git para referência temporária.
 
 = 1.1.7 =
 * Corrige a validação do campo de Nome Completo (`full_name`) no servidor, adicionando verificação de obrigatoriedade no backend para impedir transações sem o preenchimento do nome do comprador.
